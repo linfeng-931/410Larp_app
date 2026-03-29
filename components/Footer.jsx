@@ -1,17 +1,20 @@
-import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
+import { StyleSheet, View, Image, Pressable, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import { styles } from '../utils/styleFormat';
+import Images from '../assets/images/images';
 
 export default function Footer({ page }) {
     const router = useRouter();
+    const colorScheme = useColorScheme();
+    const imageRoute = "../assets/images/"+{colorScheme}+"/";
 
     return (
         <View style={styles.footer}>
             {page == 1 ?
                 <View style={styles.iconBtn}>
                     <Image
-                        source={require('../assets/images/Home.svg')}
-                        style={{ width: 30, height: 30 }}
+                        source={require('../assets/images/Vector.png')}
+                        style={styles.iconBtn}
                     />
                 </View> :
                 <Pressable
@@ -24,18 +27,18 @@ export default function Footer({ page }) {
                 >
                     <View style={styles.iconBtnDisact}>
                         <Image
-                            source={require('../assets/images/Home.svg')}
-                            style={{ width: 30, height: 30 }}
+                            source={Images[colorScheme].Vector}
+                            style={styles.iconBtnDisact}
                         />
                     </View>
                 </Pressable>
             }
-            {/* 
+
             {page == 2 ?
                 <View style={styles.iconBtn}>
                     <Image
-                        source={require('../assets/images/icon_nav_bookmark_actived.png')}
-                        style={{ width: 30, height: 30 }}
+                        source={require('../assets/images/Storage.png')}
+                        style={styles.iconBtn}
                     />
                 </View>
                 :
@@ -49,21 +52,25 @@ export default function Footer({ page }) {
                 >
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         <Image
-                            source={require('../assets/images/icon_nav_bookmark.png')}
-                            style={{ width: 30, height: 30 }}
+                            source={Images[colorScheme].Storage}
+                            style={styles.iconBtnDisact}
                         />
-                        <Text style={{ fontFamily: 'Roboto_400Regular', color: '#666' }}>Wishist</Text>
                     </View>
                 </Pressable>
             }
+            <View style={styles.roundedBtn}>
+                <Image
+                    source={Images[colorScheme].Add}
+                    style={styles.iconBtn}
+                />
+            </View>
 
             {page == 3 ?
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     <Image
-                        source={require('../assets/images/icon_mybook_actived.png')}
-                        style={{ width: 30, height: 30 }}
+                        source={require('../assets/images/Chat.png')}
+                        style={styles.iconBtn}
                     />
-                    <Text style={{ fontFamily: 'Roboto_400Regular', color: '#6200EE' }}>My books</Text>
                 </View>
                 :
                 <Pressable
@@ -76,13 +83,36 @@ export default function Footer({ page }) {
                 >
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         <Image
-                            source={require('../assets/images/icon_mybook.png')}
-                            style={{ width: 30, height: 30 }}
+                            source={Images[colorScheme].Chat}
+                            style={styles.iconBtnDisact}
                         />
-                        <Text style={{ fontFamily: 'Roboto_400Regular', color: '#666' }}>My books</Text>
                     </View>
                 </Pressable>
-            }*/}
+            }
+            {page == 4 ?
+                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                    <Image
+                        source={require('../assets/images/User.png')}
+                        style={styles.iconBtn}
+                    />
+                </View>
+                :
+                <Pressable
+                    style={({ pressed }) => ({
+                        opacity: pressed ? 0.5 : 1,
+                    })}
+                    onPress={() => {
+                        router.push('/subPage/myBook')
+                    }}
+                >
+                    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                        <Image
+                            source={Images[colorScheme].User}
+                            style={styles.iconBtnDisact}
+                        />
+                    </View>
+                </Pressable>
+            }
         </View>
     );
 }

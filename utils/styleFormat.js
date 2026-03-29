@@ -42,16 +42,28 @@ export const styles = StyleSheet.create({
     // Android 陰影
     elevation: 5, 
   },
+
+   //footer
   iconBtn: {
-    color: colors.color1,
+    width: 22, 
+    height: 21,
     alignItems: 'center', 
     justifyContent: 'center', 
   },
   iconBtnDisact:{
-    color: colors.color2,
+    width: 20, 
+    height: 20,
     opacity: 0.2,
     alignItems: 'center', 
     justifyContent: 'center', 
+  },
+  roundedBtn:{
+    width:56,
+    height: 56,
+    backgroundColor: colors.color1,
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
   },
   footer: {
     flexDirection: 'row',
@@ -62,13 +74,13 @@ export const styles = StyleSheet.create({
     height: 80,
     width: '100%',
     padding: 20,
-    backgroundColor: '#ffffffff',
-    shadowColor: '#000000',
-    shadowOpacity: 0.2,
+    backgroundColor: colors.color3,
+    shadowColor: colors.color2,
+    shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: -3},
     shadowRadius: 5,
     justifyContent: 'space-around',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     borderRadius: 30,
   },
 });
