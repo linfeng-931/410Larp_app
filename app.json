@@ -1,8 +1,27 @@
 {
   "expo": {
+    "name": "410Larp",
+    "slug": "410Larp",
+    "version": "1.0.0",
     "scheme": "acme",
+    "ios": {
+      "bundleIdentifier": "com.linfeng.larp410",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.linfeng.larp410"
+    },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bde57199-efbe-4ff9-87d1-ae1f3385bcdd"
+      }
+    }
   }
 }
