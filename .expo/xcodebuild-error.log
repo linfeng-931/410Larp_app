@@ -1,7 +1,0 @@
-** BUILD FAILED **
-
-
-The following build commands failed:
-	CompileC /Users/huanghsianghan/Library/Developer/Xcode/DerivedData/410Larp-dfqhifflcunzrbdotswvbzojmslq/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/ExpoHead.build/Objects-normal/arm64/LinkPreviewNativeNavigation-ae48070f1391158aa9c21f243ba66b4e.o /Users/huanghsianghan/410Larp/node_modules/expo-router/ios/LinkPreview/LinkPreviewNativeNavigation.mm normal arm64 objective-c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'ExpoHead' from project 'Pods')
-	Building workspace 410Larp with scheme 410Larp and configuration Debug
-(2 failures)
