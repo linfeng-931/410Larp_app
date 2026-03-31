@@ -1,30 +1,23 @@
 import {
-  StyleSheet,
   View,
-  Image,
   Pressable,
   useColorScheme,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { styles } from "../utils/styleFormat";
-import Images from "../assets/images/images";
+import { getStyles } from "../utils/styleFormat";
 import { FontAwesome } from "@expo/vector-icons";
-import { Camera, Archive } from "lucide-react-native";
+import { Camera, Archive, Plus, MessageCircleMore, Settings} from "lucide-react-native";
+import { colors } from "../utils/colors";
 
 export default function Footer({ page }) {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const imageRoute = "../assets/images/" + { colorScheme } + "/";
+  const styles = getStyles(colorScheme);
 
   return (
     <View style={styles.footer}>
-      {/* {page == 1 ? (
-        <View style={styles.iconBtn}>
-          <Image
-            source={require("../assets/images/Vector.png")}
-            style={styles.iconBtn}
-          />
-        </View>
+      {page == 1 ? (
+        <FontAwesome name="home" size={24} style={styles.iconBtn} />
       ) : (
         <Pressable
           style={({ pressed }) => ({
@@ -34,22 +27,12 @@ export default function Footer({ page }) {
             router.replace("/");
           }}
         >
-          <View style={styles.iconBtnDisact}>
-            <Image
-              source={Images[colorScheme].Vector}
-              style={styles.iconBtnDisact}
-            />
-          </View>
+          <FontAwesome name="home" size={24} style={styles.iconBtnDisact} />
         </Pressable>
       )}
 
       {page == 2 ? (
-        <View style={styles.iconBtn}>
-          <Image
-            source={require("../assets/images/Storage.png")}
-            style={styles.iconBtn}
-          />
-        </View>
+        <Archive style={styles.iconBtn} size={24}/>
       ) : (
         <Pressable
           style={({ pressed }) => ({
@@ -59,25 +42,16 @@ export default function Footer({ page }) {
             router.push("/subPage/bookMark");
           }}
         >
-          <View style={{ alignItems: "center", justifyContent: "center" }}>
-            <Image
-              source={Images[colorScheme].Storage}
-              style={styles.iconBtnDisact}
-            />
-          </View>
+          <Archive style={styles.iconBtnDisact} size={24}/>
         </Pressable>
       )}
+      
       <View style={styles.roundedBtn}>
-        <Image source={Images[colorScheme].Add} style={styles.iconBtn} />
+        <Plus size={24} style={styles.iconOfRoundedBtn}/>
       </View>
 
       {page == 3 ? (
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <Image
-            source={require("../assets/images/Chat.png")}
-            style={styles.iconBtn}
-          />
-        </View>
+        <MessageCircleMore size={24} style={styles.iconBtn}/>
       ) : (
         <Pressable
           style={({ pressed }) => ({
@@ -87,21 +61,11 @@ export default function Footer({ page }) {
             router.push("/subPage/myBook");
           }}
         >
-          <View style={{ alignItems: "center", justifyContent: "center" }}>
-            <Image
-              source={Images[colorScheme].Chat}
-              style={styles.iconBtnDisact}
-            />
-          </View>
+          <MessageCircleMore size={24} style={styles.iconBtnDisact}/>
         </Pressable>
       )}
       {page == 4 ? (
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <Image
-            source={require("../assets/images/User.png")}
-            style={styles.iconBtn}
-          />
-        </View>
+        <Settings size={24} style={styles.iconBtn}/>
       ) : (
         <Pressable
           style={({ pressed }) => ({
@@ -111,17 +75,9 @@ export default function Footer({ page }) {
             router.push("/subPage/myBook");
           }}
         >
-          <View style={{ alignItems: "center", justifyContent: "center" }}>
-            <Image
-              source={Images[colorScheme].User}
-              style={styles.iconBtnDisact}
-            />
-          </View>
+          <Settings size={24} style={styles.iconBtnDisact}/>
         </Pressable>
-      )} */}
-      <FontAwesome name="home" size={24} color="#42A6DE" />
-      <Camera color="red" size={48} />
-      <Archive color="red" size={48} />
+      )}
     </View>
   );
 }
