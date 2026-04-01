@@ -1,4 +1,5 @@
-import { TouchableOpacity, Text, View, Image, useColorScheme, } from "react-native";
+import { View, useColorScheme} from "react-native";
+import { Stack } from "expo-router";
 import { useState } from "react";
 import { getStyles } from "../utils/styleFormat";
 import Footer from "../components/Footer";
@@ -12,10 +13,21 @@ export default function Page() {
     "no-bills": require("../assets/fonts/post-no-bills-colombo.extrabold.ttf"),
   });
   return (
-    <View style={styles.container}>
-      <View style={styles.main}></View>
+    <>
+      <Stack.Screen 
+          options={{ 
+            headerLeft: () => null,
+            headerBackVisible: false,
+            title: "首頁" 
+          }} 
+        />
+        <View style={styles.container}>
+        <View style={styles.main}>
+        </View>
 
-      <Footer page={1} />
-    </View>
+        <Footer page={1} />
+      </View>
+    </>
+    
   );
 }

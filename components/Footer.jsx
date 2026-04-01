@@ -6,7 +6,7 @@ import {
 import { useRouter } from "expo-router";
 import { getStyles } from "../utils/styleFormat";
 import { FontAwesome } from "@expo/vector-icons";
-import { Camera, Archive, Plus, MessageCircleMore, Settings} from "lucide-react-native";
+import { Home, LibraryBig, Plus, MessageCircleMore, Settings} from "lucide-react-native";
 import { colors } from "../utils/colors";
 
 export default function Footer({ page }) {
@@ -17,7 +17,7 @@ export default function Footer({ page }) {
   return (
     <View style={styles.footer}>
       {page == 1 ? (
-        <FontAwesome name="home" size={24} style={styles.iconBtn} />
+        <Home size={24} style={styles.iconBtn} />
       ) : (
         <Pressable
           style={({ pressed }) => ({
@@ -27,22 +27,22 @@ export default function Footer({ page }) {
             router.replace("/");
           }}
         >
-          <FontAwesome name="home" size={24} style={styles.iconBtnDisact} />
+          <Home size={24} style={styles.iconBtnDisact} />
         </Pressable>
       )}
 
       {page == 2 ? (
-        <Archive style={styles.iconBtn} size={24}/>
+        <LibraryBig size={24} style={styles.iconBtn}/>
       ) : (
         <Pressable
           style={({ pressed }) => ({
             opacity: pressed ? 0.5 : 1,
           })}
           onPress={() => {
-            router.push("/subPage/bookMark");
+            router.push("/subPage/Library");
           }}
         >
-          <Archive style={styles.iconBtnDisact} size={24}/>
+          <LibraryBig style={styles.iconBtnDisact} size={24}/>
         </Pressable>
       )}
       

@@ -16,18 +16,29 @@ export const getStyles = (theme) =>{
       paddingTop: 48,
       paddingRight: 32,
       paddingLeft: 32,
+      width: '100%',
     },
+
+    //font
     title: {
-      fontSize: 32,
-      fontWeight: 600,
-      borderBottomWidth: 1,
-      paddingBottom: 10,
-      marginBottom: 50,
-    },
-    subtitle: {
       fontSize: 18,
-      opacity: 0.6,
+      fontWeight: 700,
     },
+    content1: {
+      color: primaryColor,
+      fontSize: 14,
+    },
+    content2: {
+      color: primaryColor,
+      fontSize: 14,
+      opacity: 0.8,
+    },
+    content3: {
+      color: primaryColor,
+      fontSize: 14,
+      opacity: 0.5,
+    },
+
     btn: {
       backgroundColor: '#ffffff',
       borderRadius: 8,
@@ -88,5 +99,56 @@ export const getStyles = (theme) =>{
       justifyContent: 'space-around',
       alignItems: 'center',
       borderRadius: 30,
+    },
+
+    //components
+    star:{
+      flexDirection: 'row',
+    },
+    card:{
+      flexDirection: 'column',
+      backgroundColor: oppositeColor,
+      borderRadius: 16,
+      overflow: 'hidden',
+      minHeight: 450,
+      width: '100%',
+    },
+    cardContentContainer:{
+      top: '50%',
+      paddingBottom: 32,
+      paddingHorizontal: 15,
+      gap: 12,
+    },
+    cardContent:{
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+    },
+    cardIcon:{
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: primaryColor,
+      opacity: 0.9,
+    },
+    bottomCroppedImage: {
+      position: 'absolute', 
+      left: 0,
+      right: 0,
+      bottom: 0, 
+      height: '80%',          
+      top: '-35%',            
+      resizeMode: 'cover', 
+    },
+    cardTagContainer:{
+      flexDirection: 'row',
+      gap: 8,
+    },
+    cardTag: {
+      backgroundColor: `${primaryColor}26`,
+      padding: 3,
+      width: 90,
+      textAlign: 'center',
+      borderRadius: 4,
+      paddingVertical:5,
     },
 })};

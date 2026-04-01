@@ -9,7 +9,7 @@ export default function RootLayout(){
                 <Stack>
                     <Stack.Screen name="index"/>
                     <Stack.Screen name="item/[id]"/>
-                    <Stack.Screen name="subPage/bookMark"/>
+                    <Stack.Screen name="subPage/Library"/>
                     <Stack.Screen name="subPage/myBook"/>
                 </Stack>
                 <StatusBar style="auto"/>
