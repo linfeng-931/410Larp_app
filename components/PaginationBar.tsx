@@ -53,9 +53,8 @@ export default function PaginationBar() {
         data={featureStories}
         horizontal
         pagingEnabled
-        renderItem={({item}) => <Card key={item.id} story={item} colorScheme={colorScheme}/>}
+        renderItem={({item}) => <Card key={item.id} story={item} colorScheme={colorScheme} horizontal={false}/>}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
       />

@@ -1,4 +1,4 @@
-import { StyleSheet, useColorScheme, } from "react-native";
+import { StyleSheet } from "react-native";
 import { colors } from "./colors";
 
 export const getStyles = (theme) =>{
@@ -7,21 +7,33 @@ export const getStyles = (theme) =>{
   const oppositeColor = isLight ? colors.color3 : colors.color2;
 
   return StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: "center",
+    safeArea:{
+      flex:1,
       backgroundColor: oppositeColor,
+    },
+    container: {
+      flexGrow: 1, 
+      alignItems: "center",
+      paddingBottom: 48,
     },
     main:{
       flex: 1,
       paddingTop: 48,
-      paddingRight: 32,
-      paddingLeft: 32,
       width: '100%',
+      alignItems: 'center',
+      gap: 16,
     },
 
     //font
+    bigTitle:{
+      fontSize: 40, 
+      marginTop: 20,
+      marginBottom: 40,
+      fontFamily: 'ChFont',
+      color: primaryColor,
+    },
     title: {
+      color: primaryColor,
       fontSize: 18,
       fontWeight: 700,
     },
@@ -92,7 +104,7 @@ export const getStyles = (theme) =>{
       height: 80,
       width: '100%',
       padding: 20,
-      backgroundColor: colors.color3,
+      backgroundColor: oppositeColor,
       shadowColor: colors.color2,
       shadowOpacity: 0.1,
       shadowOffset: { width: 0, height: -3},
@@ -108,16 +120,33 @@ export const getStyles = (theme) =>{
     },
     card:{
       flexDirection: 'column',
-      backgroundColor: oppositeColor,
+      backgroundColor: isLight? oppositeColor: `${primaryColor}26`,
       borderRadius: 16,
       overflow: 'hidden',
       minHeight: 450,
       width: 300,
     },
+    cardHorizantal:{
+      flexDirection: 'row',
+      backgroundColor: isLight? oppositeColor: `${primaryColor}26`,
+      borderRadius: 16,
+      overflow: 'hidden',
+      minHeight: 216,
+      width: 320,
+    },
     cardContentContainer:{
       top: '50%',
       paddingBottom: 32,
       paddingHorizontal: 15,
+      gap: 12,
+    },
+    cardContentContainerHorizantal:{
+      left: '45%',
+      width: '55%',
+      paddingBottom: 32,
+      paddingHorizontal: 15,
+      paddingVertical: 15,
+      justifyContent: 'center',
       gap: 12,
     },
     cardContent:{
@@ -140,8 +169,16 @@ export const getStyles = (theme) =>{
       top: '-35%',            
       resizeMode: 'cover', 
     },
+    leftCroppedImage: {
+      position: 'absolute', 
+      left: 0,
+      height: '100%', 
+      width: '45%',                    
+      resizeMode: 'cover', 
+    },
     cardTagContainer:{
       flexDirection: 'row',
+      flexWrap: 'wrap',
       gap: 8,
     },
     cardTag: {
@@ -151,15 +188,45 @@ export const getStyles = (theme) =>{
       textAlign: 'center',
       borderRadius: 4,
       paddingVertical:5,
+      color: primaryColor,
+    },
+    cardTagHorizantal: {
+      backgroundColor: `${primaryColor}26`,
+      width: 68,
+      textAlign: 'center',
+      borderRadius: 4,
+      paddingVertical:5,
+      fontSize: 10,
+      color: primaryColor,
+    },
+    cardTagType:{
+      backgroundColor: colors.color1,
+      padding: 3,
+      width: 74,
+      textAlign: 'center',
+      borderRadius: 4,
+      paddingVertical:5,
+      color: primaryColor,
+      fontSize: 10,
+    },
+    cardTagTypeHorizantal:{
+      position: 'absolute', 
+      backgroundColor: colors.color1,
+      width: 72,
+      textAlign: 'center',
+      color: primaryColor,
+      fontSize: 10,
+      paddingVertical:6,
+      top: 0,
     },
     scrollBarList:{
       flexDirection: 'column',
       alignItems: 'center',
-      height: 500,
-      gap: 10,
+      height: 490,
     },
     list:{
       alignItems: 'center',
+      gap: 16,
     },
     dotContainer:{
       flexDirection: 'row',

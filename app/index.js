@@ -8,10 +8,6 @@ import { useFonts } from "expo-font";
 export default function Page() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-
-  let [fontsLoaded] = useFonts({
-    "no-bills": require("../assets/fonts/post-no-bills-colombo.extrabold.ttf"),
-  });
   return (
     <>
       <Stack.Screen 
