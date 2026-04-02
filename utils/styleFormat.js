@@ -10,6 +10,7 @@ export const getStyles = (theme) =>{
     container: {
       flex: 1,
       alignItems: "center",
+      backgroundColor: oppositeColor,
     },
     main:{
       flex: 1,
@@ -111,7 +112,7 @@ export const getStyles = (theme) =>{
       borderRadius: 16,
       overflow: 'hidden',
       minHeight: 450,
-      width: '100%',
+      width: 300,
     },
     cardContentContainer:{
       top: '50%',
@@ -151,4 +152,33 @@ export const getStyles = (theme) =>{
       borderRadius: 4,
       paddingVertical:5,
     },
+    scrollBarList:{
+      flexDirection: 'column',
+      alignItems: 'center',
+      height: 500,
+      gap: 10,
+    },
+    list:{
+      alignItems: 'center',
+    },
+    dotContainer:{
+      flexDirection: 'row',
+      gap: 8,
+    },
+    dot:{
+      height: 12,
+      width: 12,
+      borderRadius: 100,
+      borderColor: primaryColor,
+      opacity: 0.3,
+      borderWidth: 1.5,
+    },
+    dotActive:{
+      height: 12,
+      width: 12,
+      borderRadius: 100,
+      borderWidth: 1.5,
+      borderColor: colors.color1,
+      backgroundColor: colors.color1,
+    }
 })};

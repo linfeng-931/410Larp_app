@@ -3,6 +3,7 @@ import {
   Pressable,
   Text,
   Image,
+  Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { getStyles } from "../utils/styleFormat";
@@ -12,6 +13,7 @@ import Rank from "./Rank";
 export default function Card({ story, colorScheme }) {
   const router = useRouter();
   const styles = getStyles(colorScheme);
+  const { width } = Dimensions.get('window');
 
   return (
     <Pressable
@@ -22,6 +24,18 @@ export default function Card({ story, colorScheme }) {
         router.replace("/");
       }}
     >
+      <View style={{
+        width: width, 
+        alignItems: 'center',
+        // iOS 陰影
+        shadowColor: "#000",
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        shadowOffset:{width: 0, height: 0},
+        
+        // Android 陰影
+        elevation: 5, 
+      }}>
         <View style={styles.card}>
             <Image 
                 source = {story.cover}
@@ -52,5 +66,6 @@ export default function Card({ story, colorScheme }) {
                 <Text style={styles.content3}>{story.subtitle}</Text>
             </View>
         </View>
+      </View>
     </Pressable>
   )}
