@@ -270,6 +270,10 @@ export const getStyles = (theme) =>{
       alignItems: 'center',
       borderRadius: 8,
     },
+    dropdownContainer:{
+      backgroundColor: isLight? colors.color3: colors.color4,
+      borderWidth: 0,
+    },
     
     //SelectFrame
     selectFrame:{

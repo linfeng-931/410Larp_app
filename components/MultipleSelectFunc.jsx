@@ -40,6 +40,7 @@ export default function MultipleSelectFunc({ colorScheme }) {
             valueField="value"
             placeholder={value.length === 0 ? "劇本類型" : ''}
             value={value}
+            containerStyle={styles.dropdownContainer}
 
             alwaysRenderSelectedItem={false}
             visibleSelectedItem={false}

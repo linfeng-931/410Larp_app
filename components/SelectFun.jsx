@@ -20,7 +20,7 @@ export default function SelectFunc({ colorScheme, placeholder, options }) {
             placeholder={placeholder}
             placeholderStyle={styles.content3}
             selectedTextStyle={styles.content1}
-            containerStyle={{ backgroundColor: primaryColor}}
+            containerStyle={styles.dropdownContainer}
             itemTextStyle={styles.content1}
             activeColor={primaryColor}
             style={styles.selectFrame}
