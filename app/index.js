@@ -1,29 +1,35 @@
-import { View, useColorScheme} from "react-native";
-import { Stack } from "expo-router";
-import { useState } from "react";
-import { getStyles } from "../utils/styleFormat";
-import Footer from "../components/Footer";
-import { useFonts } from "expo-font";
+import { useColorScheme, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { router } from "expo-router";
+import LottieView from "lottie-react-native";
 
 export default function Page() {
+  const animationRef = useRef(null);
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  return (
-    <>
-      <Stack.Screen 
-          options={{ 
-            headerLeft: () => null,
-            headerBackVisible: false,
-            title: "首頁" 
-          }} 
-        />
-        <View style={styles.container}>
-        <View style={styles.main}>
-        </View>
 
-        <Footer page={1} />
-      </View>
-    </>
-    
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.replace("subPage/Home");
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const splashAnimation =
+    colorScheme == "light"
+      ? require("../assets/animation/Splash_Screen_White.json")
+      : require("../assets/animation/Splash_Screen_Black.json");
+
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <LottieView
+        ref={animationRef}
+        source={splashAnimation}
+        autoPlay
+        loop={false}
+        resizeMode="cover"
+        style={{ width: "100%", height: "100%" }}
+      />
+    </View>
   );
 }
