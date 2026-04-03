@@ -1,17 +1,19 @@
-import {
-  View,
-  Pressable,
-  useColorScheme,
-} from "react-native";
+import { View, Pressable, useColorScheme } from "react-native";
 import { useRouter } from "expo-router";
 import { getStyles } from "../utils/styleFormat";
 import { FontAwesome } from "@expo/vector-icons";
-import { Home, LibraryBig, Plus, MessageCircleMore, Settings} from "lucide-react-native";
+import {
+  Home,
+  LibraryBig,
+  Plus,
+  MessageCircleMore,
+  Settings,
+} from "lucide-react-native";
 import { colors } from "../utils/colors";
 
 export default function Footer({ page }) {
   const router = useRouter();
-  const colorScheme = useColorScheme();
+  const colorScheme = "useColorScheme()";
   const styles = getStyles(colorScheme);
 
   return (
@@ -32,7 +34,7 @@ export default function Footer({ page }) {
       )}
 
       {page == 2 ? (
-        <LibraryBig size={24} style={styles.iconBtn}/>
+        <LibraryBig size={24} style={styles.iconBtn} />
       ) : (
         <Pressable
           style={({ pressed }) => ({
@@ -42,16 +44,16 @@ export default function Footer({ page }) {
             router.push("/subPage/Library");
           }}
         >
-          <LibraryBig style={styles.iconBtnDisact} size={24}/>
+          <LibraryBig style={styles.iconBtnDisact} size={24} />
         </Pressable>
       )}
-      
+
       <View style={styles.roundedBtn}>
-        <Plus size={24} style={styles.iconOfRoundedBtn}/>
+        <Plus size={24} style={styles.iconOfRoundedBtn} />
       </View>
 
       {page == 3 ? (
-        <MessageCircleMore size={24} style={styles.iconBtn}/>
+        <MessageCircleMore size={24} style={styles.iconBtn} />
       ) : (
         <Pressable
           style={({ pressed }) => ({
@@ -61,11 +63,11 @@ export default function Footer({ page }) {
             router.push("/subPage/myBook");
           }}
         >
-          <MessageCircleMore size={24} style={styles.iconBtnDisact}/>
+          <MessageCircleMore size={24} style={styles.iconBtnDisact} />
         </Pressable>
       )}
       {page == 4 ? (
-        <Settings size={24} style={styles.iconBtn}/>
+        <Settings size={24} style={styles.iconBtn} />
       ) : (
         <Pressable
           style={({ pressed }) => ({
@@ -75,7 +77,7 @@ export default function Footer({ page }) {
             router.push("/subPage/myBook");
           }}
         >
-          <Settings size={24} style={styles.iconBtnDisact}/>
+          <Settings size={24} style={styles.iconBtnDisact} />
         </Pressable>
       )}
     </View>
