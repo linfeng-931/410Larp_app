@@ -1,7 +1,6 @@
 import {
   View,
   useColorScheme,
-  FlatList,
   ScrollView,
   ImageBackground,
   Text,
@@ -12,27 +11,29 @@ import { stories } from "../../utils/story";
 import Images from "../../assets/images/images";
 import { Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import PaginationBar from "../../components/PaginationBar";
-import Card from "../../components/Card";
 import Btn from "../../components/Btn";
 import Footer from "../../components/Footer";
 import SearchFunc from "../../components/SearchFunc";
 import MultipleSelectFunc from "../../components/MultipleSelectFunc";
 import SelectFunc from "../../components/SelectFun";
+import StoriesList from "../../components/StoriesList";
+import ScrollTop from "../../components/ScrollTop";
 
 export default function Library() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const scrollRef = useRef(null);
 
   /* 狀態控制 */
-  const [amount, SetAmount] = useState(5);
   const [storyName, SetStoryName] = useState('');
   const [storyPeople, SetStoryPeople] = useState('');
   const [storyStar, SetStoryStar] = useState('');
   const [storyTag, SetStoryTag] = useState([]);
   const [pageStatus, SetPageStatus] = useState(0);
+  const [currentStories, SetCurrentStories] = useState([]);
 
   /* 文字載入 */
   let [fontsLoaded] = useFonts({
@@ -59,11 +60,9 @@ export default function Library() {
     { value: 5, label: '★ 5' }
   ];
 
-  const [currentStories, SetCurrentStories] = useState([]);
-
   /* 劇本查詢 */
   const StorySearch = function (stories) {
-    const newStories =  stories.filter(item => { 
+    const newStories = stories.filter(item => {
       const matchName = storyName !== '' ?
         storyName.split('').every(char =>
           item.title.toLowerCase().includes(char.toLowerCase()))
@@ -74,7 +73,21 @@ export default function Library() {
         : true;
 
       const matchPeople = storyPeople !== '' ?
-        item.people === storyPeople
+        (() => {
+          if (!Array.isArray(item.people) || item.people.length === 0) {
+            return String(item.people) === String(storyPeople);
+          }
+
+          const selectedNum = Number(storyPeople);
+          if (item.people.length > 1) {
+            const min = Math.min(...item.people);
+            const max = Math.max(...item.people);
+
+            return selectedNum >= min && selectedNum <= max;
+          }
+
+          return item.people.map(String).includes(String(storyPeople));
+        })()
         : true;
 
       const matchStar = storyStar !== '' ?
@@ -84,112 +97,88 @@ export default function Library() {
       return matchName && matchTag && matchPeople && matchStar;
     });
 
-    const isFilter = storyName !== '' || storyTag.length > 0 || storyPeople !=='' || storyStar !== '';
-    if(isFilter){
+    const isFilter = storyName !== '' || storyTag.length > 0 || storyPeople !== '' || storyStar !== '';
+    if (isFilter) {
       SetCurrentStories(newStories);
       SetPageStatus(1);
     }
-    else{
+    else {
       SetCurrentStories([]);
       SetPageStatus(0);
     }
   };
 
   return (
-    <SafeAreaView
-      style={styles.safeArea}
-      edges={['top', 'left', 'right']}
-    >
-      <Stack.Screen
-        options={{ headerShown: false }}
-      />
-
-      <ImageBackground
-        style={styles.container}
-        imageStyle={{ opacity: 0.5 }}
-        source={Images[colorScheme].Library}
+    <>
+      <SafeAreaView
+        style={styles.safeArea}
+        edges={['top', 'left', 'right']}
       >
-        <ScrollView
-          contentContainerStyle={styles.container}
-          showsVerticalScrollIndicator={false}
+        <Stack.Screen
+          options={{ headerShown: false }}
+        />
+
+        <ImageBackground
+          style={styles.container}
+          imageStyle={{ opacity: 0.5 }}
+          source={Images[colorScheme].Library}
         >
-          <Text style={styles.bigTitle}>劇本檔案櫃</Text>
+          <ScrollView
+            contentContainerStyle={styles.container}
+            showsVerticalScrollIndicator={false}
+            ref={scrollRef}
+          >
+            <Text style={styles.bigTitle}>劇本檔案櫃</Text>
 
-          {/* 查詢功能 */}
-          <View style={{ width: '100%', paddingHorizontal: 32, gap: 16, marginBottom: 32 }}>
-            <SearchFunc colorScheme={colorScheme} value={storyName} onValueChange={SetStoryName} />
-            <MultipleSelectFunc colorScheme={colorScheme} value={storyTag} onValueChange={SetStoryTag} />
-            <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View style={{ width: '47%' }}>
-                <SelectFunc colorScheme={colorScheme} placeholder={'人數'} options={optionsPeople} value={storyPeople} onValueChange={SetStoryPeople} />
+            {/* 查詢功能 */}
+            <View style={{ width: '100%', paddingHorizontal: 32, gap: 16, marginBottom: 32 }}>
+              <SearchFunc colorScheme={colorScheme} value={storyName} onValueChange={SetStoryName} />
+              <MultipleSelectFunc colorScheme={colorScheme} value={storyTag} onValueChange={SetStoryTag} />
+              <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={{ width: '47%' }}>
+                  <SelectFunc colorScheme={colorScheme} placeholder={'人數'} options={optionsPeople} value={storyPeople} onValueChange={SetStoryPeople} />
+                </View>
+                <View style={{ width: '47%' }}>
+                  <SelectFunc colorScheme={colorScheme} placeholder={'難度'} options={optionsLevel} value={storyStar} onValueChange={SetStoryStar} />
+                </View>
               </View>
-              <View style={{ width: '47%' }}>
-                <SelectFunc colorScheme={colorScheme} placeholder={'難度'} options={optionsLevel} value={storyStar} onValueChange={SetStoryStar} />
-              </View>
-            </View>
-            <Btn colorScheme={colorScheme} font={'搜尋'} func={() => StorySearch(stories)} btnType={1} />
-            {pageStatus === 1 &&
-              <Btn 
-                colorScheme={colorScheme} 
-                font={'清空搜尋'} 
-                func={() => {
-                  SetPageStatus(0);
-                  SetStoryName('');
-                  SetStoryPeople('');
-                  SetStoryStar('');
-                  SetStoryTag([]);
-                  SetCurrentStories([]);
-                }} 
-                btnType={0} 
-              />
-            }
-          </View>
-
-          {/* 劇本顯示 */}
-
-          {pageStatus === 0 &&
-            <>
-              <View style={{ gap: 16, alignItems: 'center' }}>
-                <Text style={styles.title}>精選劇本</Text>
-                <PaginationBar />
-              </View>
-              <View style={styles.main}>
-                <Text style={styles.title}>更多精彩劇本</Text>
-                <FlatList
-                  data={stories.slice(0, amount)}
-                  scrollEnabled={false}
-                  renderItem={({ item }) => <Card key={item.id} story={item} colorScheme={colorScheme} horizontal={true} />}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.list}
-                  showsHorizontalScrollIndicator={false}
+              <Btn colorScheme={colorScheme} font={'搜尋'} func={() => StorySearch(stories)} btnType={1} />
+              {pageStatus === 1 &&
+                <Btn
+                  colorScheme={colorScheme}
+                  font={'清空搜尋'}
+                  func={() => {
+                    SetPageStatus(0);
+                    SetStoryName('');
+                    SetStoryPeople('');
+                    SetStoryStar('');
+                    SetStoryTag([]);
+                    SetCurrentStories([]);
+                  }}
+                  btnType={0}
                 />
-                <View style={{ width: 152 }}>
-                  <Btn colorScheme={colorScheme} font={'顯示更多'} func={() => SetAmount(amount + 5)} btnType={0} />
-                </View>
-              </View>
-            </>
-          }
-          {pageStatus === 1 &&
-            <View style={styles.main}>
-              <Text style={styles.title}>{currentStories.length}個結果</Text>
-              <FlatList
-                data={currentStories.slice(0, amount)}
-                scrollEnabled={false}
-                renderItem={({ item }) => <Card key={item.id} story={item} colorScheme={colorScheme} horizontal={true} />}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.list}
-                showsHorizontalScrollIndicator={false}
-              />
-              {currentStories.length > 5 &&
-                <View style={{ width: 152 }}>
-                  <Btn colorScheme={colorScheme} font={'顯示更多'} func={() => SetAmount(amount + 5)} btnType={0} />
-                </View>
               }
             </View>
-          }
-        </ScrollView>
-        <Footer page={2} />
-      </ImageBackground>
-    </SafeAreaView>
+
+            {/* 劇本顯示 */}
+
+            {pageStatus === 0 &&
+              <>
+                <View style={{ gap: 16, alignItems: 'center' }}>
+                  <Text style={styles.title}>精選劇本</Text>
+                  <PaginationBar />
+                </View>
+                <StoriesList currentStories={stories} pageStatus={pageStatus} styles={styles} colorScheme={colorScheme} />
+              </>
+            }
+            {pageStatus === 1 &&
+              <StoriesList currentStories={currentStories} pageStatus={pageStatus} styles={styles} colorScheme={colorScheme} />
+            }
+          </ScrollView>
+        </ImageBackground>
+      </SafeAreaView>
+      <ScrollTop scrollRef={scrollRef} styles={styles}/>
+      <Footer page={2} />
+    </>
   );
 }

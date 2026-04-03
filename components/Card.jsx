@@ -21,7 +21,12 @@ export default function Card({ story, colorScheme, horizontal }) {
         opacity: pressed ? 0.5 : 1,
       })}
       onPress={() => {
-        router.replace("/");
+        router.push({
+          pathname : `/story/${story.id}`,
+          params: { 
+            id : story.id, 
+          }
+        })
       }}
     >
       <View style={{
@@ -60,7 +65,10 @@ export default function Card({ story, colorScheme, horizontal }) {
               </View>
               <View style={styles.cardContent}>
                 <UsersRound size={18} style={styles.cardIcon} />
-                <Text style={styles.content2}>{story.people}人</Text>
+                {story.people.length === 1 ?
+                  <Text style={styles.content2}>{story.people}人</Text> :
+                  <Text style={styles.content2}>{story.people[0]}-{story.people[1]}人</Text>
+                }
               </View>
               <View style={styles.cardContent}>
                 <Shirt size={18} style={styles.cardIcon} />
@@ -100,7 +108,10 @@ export default function Card({ story, colorScheme, horizontal }) {
               </View>
               <View style={styles.cardContent}>
                 <UsersRound size={18} style={styles.cardIcon} />
-                <Text style={styles.content2}>{story.people}人</Text>
+                {story.people.length === 1 ?
+                  <Text style={styles.content2}>{story.people}人</Text> :
+                  <Text style={styles.content2}>{story.people[0]}-{story.people[1]}人</Text>
+                }
               </View>
               <View style={styles.cardContent}>
                 <Shirt size={18} style={styles.cardIcon} />

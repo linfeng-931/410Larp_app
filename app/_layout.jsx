@@ -8,9 +8,10 @@ export default function RootLayout(){
             <KeyboardProvider>
                 <Stack>
                     <Stack.Screen name="index"/>
-                    <Stack.Screen name="item/[id]"/>
+                    <Stack.Screen name="story/[id]"/>
                     <Stack.Screen name="subPage/Library"/>
                     <Stack.Screen name="subPage/myBook"/>
+                    <Stack.Screen name="subPage/Reservation"/>
                 </Stack>
                 <StatusBar style="auto"/>
             </KeyboardProvider>

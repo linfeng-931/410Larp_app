@@ -18,12 +18,15 @@ export default function MultipleSelectFunc({ colorScheme, value, onValueChange }
         { value: '機制陣營', label: '機制陣營' },
         { value: '真相還原', label: '真相還原' },
         { value: '情感沈浸', label: '情感沈浸' },
+        { value: '演繹沈浸', label: '演繹沈浸' },
+        { value: '恐怖驚悚', label: '恐怖驚悚' },
         { value: '歡樂搞笑', label: '歡樂搞笑' },
         { value: '推理緝兇', label: '推理緝兇' },
         { value: '環繞投影', label: '環繞投影' },
         { value: '城市限定', label: '城市限定' },
         { value: '刑偵緝兇', label: '刑偵緝兇' },
         { value: '開醺派對', label: '開醺派對' },
+        { value: 'VR虛擬實境', label: 'VR虛擬實境' },
     ];
     const isLight = colorScheme === 'light';
     const primaryColor = isLight ? colors.color3 : colors.color2;
