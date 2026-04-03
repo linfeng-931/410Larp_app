@@ -9,9 +9,9 @@ import { useState } from "react";
 import { colors } from "../utils/colors";
 import { X } from "lucide-react-native";
 
-export default function MultipleSelectFunc({ colorScheme }) {
+export default function MultipleSelectFunc({ colorScheme, value, onValueChange }) {
     const styles = getStyles(colorScheme);
-    const [value, setValue] = useState([]);
+    
     const options = [
         { value: '新手入門', label: '新手入門' },
         { value: '硬核推理', label: '硬核推理' },
@@ -45,8 +45,8 @@ export default function MultipleSelectFunc({ colorScheme }) {
             alwaysRenderSelectedItem={false}
             visibleSelectedItem={false}
 
-            onChange={item => {
-                setValue(item);
+            onChange={(item) => {
+                onValueChange(item);
             }}
 
             renderLeftIcon={(item, unSelect) => {
@@ -59,7 +59,8 @@ export default function MultipleSelectFunc({ colorScheme }) {
                         return (
                             <TouchableOpacity
                                 key={val}
-                                onPress={() => setValue(value.filter(v => v !== val))}
+                                activeOpacity={0.5}
+                                onPress={() => onValueChange(value.filter(v => v !== val))}
                                 style={styles.selectTag}
                             >
                                 <Text style={styles.selectTagFont}>{item.label}</Text>
