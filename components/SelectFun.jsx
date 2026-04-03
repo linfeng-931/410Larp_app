@@ -8,9 +8,8 @@ import { getStyles } from "../utils/styleFormat";
 import { useState } from "react";
 import { colors } from "../utils/colors";
 
-export default function SelectFunc({ colorScheme, placeholder, options }) {
+export default function SelectFunc({ colorScheme, placeholder, options, value, onValueChange }) {
     const styles = getStyles(colorScheme);
-    const [value, setValue] = useState("");
 
     const isLight = colorScheme === 'light';
     const primaryColor = isLight ? colors.color3 : colors.color2;
@@ -29,8 +28,12 @@ export default function SelectFunc({ colorScheme, placeholder, options }) {
             valueField="value"
             value={value}
             onChange={item => {
-                if(item.value === value) setValue("");
-                else setValue(item.value);
+                if(item.value === value){
+                    onValueChange("");
+                }
+                else{
+                    onValueChange(item.value);
+                }
             }} 
 
             renderItem={(item) => {
