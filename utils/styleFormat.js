@@ -49,9 +49,13 @@ export const getStyles = (theme) =>{
     content3: {
       color: primaryColor,
       fontSize: 14,
-      opacity: 0.5,
+      opacity: 0.4,
     },
-
+    content4: {
+      color: primaryColor,
+      fontSize: 10,
+      opacity: 0.8,
+    },
     btn: {
       backgroundColor: '#ffffff',
       borderRadius: 8,
@@ -71,6 +75,7 @@ export const getStyles = (theme) =>{
       // Android 陰影
       elevation: 5, 
     },
+
 
     //footer
     iconBtn: {
@@ -114,17 +119,19 @@ export const getStyles = (theme) =>{
       borderRadius: 30,
     },
 
-    //components
+    //-------------------------------------components-------------------------------------
     star:{
       flexDirection: 'row',
     },
+
+    //card
     card:{
       flexDirection: 'column',
       backgroundColor: isLight? oppositeColor: `${primaryColor}26`,
       borderRadius: 16,
       overflow: 'hidden',
       minHeight: 450,
-      width: 300,
+      width: "82%",
     },
     cardHorizantal:{
       flexDirection: 'row',
@@ -219,6 +226,8 @@ export const getStyles = (theme) =>{
       paddingVertical:6,
       top: 0,
     },
+
+    //PaginationBar
     scrollBarList:{
       flexDirection: 'column',
       alignItems: 'center',
@@ -247,5 +256,48 @@ export const getStyles = (theme) =>{
       borderWidth: 1.5,
       borderColor: colors.color1,
       backgroundColor: colors.color1,
+    },
+
+    //SearchFrame
+    searchFrame:{
+      backgroundColor: `${primaryColor}26`,
+      width: '100%',
+      padding: 16,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 24,
+      height: 60,
+      alignItems: 'center',
+      borderRadius: 8,
+    },
+    
+    //SelectFrame
+    selectFrame:{
+      backgroundColor: `${primaryColor}26`,
+      width: '100%',
+      paddingHorizontal: 16,
+      gap: 24,
+      borderRadius: 8,
+      paddingVertical: 15,
+      minHeight: 60,
+    },
+    selectTag: {
+      backgroundColor: colors.color1,
+      width: 82,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 4,
+      paddingVertical:8,
+      fontSize: 10,
+      flexDirection: 'row',
+      gap: 8,
+    },
+    selectTagFont:{
+      color: oppositeColor,
+      fontSize: 12,
+      fontWeight: 600,
+    },
+    selectIcon:{
+      color: oppositeColor,
     }
 })};
