@@ -9,6 +9,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Alert,
+  Keyboard,
 } from "react-native";
 import { getStyles } from "../../utils/styleFormat";
 import { useFonts } from "expo-font";
@@ -34,12 +35,15 @@ import {
   EyeClosed,
   Eye,
 } from "lucide-react-native";
+import LottieView from "lottie-react-native";
 
 export default function SignUp() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const isLight = colorScheme === "light";
   const scrollRef = useRef(null);
+  const animationRef = useRef(null);
+  const loadingAnimation = require("../../assets/animation/Loading.json");
 
   //   表單輸入
   const [photo, setPhoto] = useState(null);
@@ -318,7 +322,10 @@ export default function SignUp() {
                 <Text style={styles.content1}>生日</Text>
                 <Pressable
                   style={styles.inputFrame}
-                  onPress={() => setShowDatePicker(true)}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setShowDatePicker(true);
+                  }}
                 >
                   <Text
                     style={[
@@ -433,6 +440,7 @@ export default function SignUp() {
                   <Phone color={isLight ? "#000" : "#fff"} />
                   <TextInput
                     style={styles.textInput}
+                    keyboardType="number-pad"
                     placeholder="09xx-xxx-xxx"
                     onChangeText={(t) => setFormData({ ...formData, phone: t })}
                   />
@@ -498,7 +506,14 @@ export default function SignUp() {
               })}
             >
               {loading ? (
-                <Ellipsis color="#fff" />
+                <LottieView
+                  ref={animationRef}
+                  source={loadingAnimation}
+                  autoPlay
+                  loop={true}
+                  resizeMode="cover"
+                  style={{ width: "50%", height: "50%" }}
+                />
               ) : (
                 <Text style={{ fontSize: 16, color: "#fff", fontWeight: 900 }}>
                   註冊
