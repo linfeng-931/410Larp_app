@@ -76,6 +76,8 @@ export default function LogIn() {
           error.code === "auth/user-not-found"
         ) {
           Alert.alert("登入失敗", "帳號或密碼錯誤。");
+          setEmailError("帳號或密碼錯誤");
+          setePasswordError("帳號或密碼錯誤");
         } else if (error.code === "auth/too-many-requests") {
           Alert.alert("登入失敗", "嘗試次數過多，請稍後再試。");
         } else {
@@ -137,7 +139,11 @@ export default function LogIn() {
                   <TextInput
                     onChangeText={(val) => {
                       setEmail(val);
-                      setEmailError("");
+                      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                      if (emailError && emailRegex.test(val)) {
+                        setEmailError("");
+                      }
                     }}
                     value={email}
                     placeholder="example@email.com"
@@ -174,7 +180,10 @@ export default function LogIn() {
                   <TextInput
                     onChangeText={(val) => {
                       setPassword(val);
-                      setePasswordError("");
+
+                      if (passwordError) {
+                        setePasswordError("");
+                      }
                     }}
                     value={password}
                     placeholder="輸入密碼"
@@ -198,7 +207,7 @@ export default function LogIn() {
               </View>
 
               {/* Forget Password */}
-              <Pressable>
+              <Pressable onPress={() => router.push("/subPage/ForgetPassword")}>
                 {({ pressed }) => (
                   <Text
                     style={{

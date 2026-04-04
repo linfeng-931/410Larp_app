@@ -51,7 +51,7 @@ export default function SignUp() {
   const [date, setDate] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const [passWord, showPassWord] = useState(false);
-  const [comfirmPassWord, showcomfirmPassWord] = useState(false);
+  const [confirmPassword, showconfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     uid: "",
     displayName: "",
@@ -84,6 +84,13 @@ export default function SignUp() {
 
     const formattedDate = `${currentDate.getFullYear()}/${(currentDate.getMonth() + 1).toString().padStart(2, "0")}/${currentDate.getDate().toString().padStart(2, "0")}`;
     setFormData({ ...formData, birthday: formattedDate });
+
+    if (errors.birthday) {
+      setErrors((prev) => {
+        const { birthday, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   //   錯誤驗證
@@ -241,10 +248,16 @@ export default function SignUp() {
                   <TextInput
                     style={styles.textInput}
                     placeholder="輸入ID名稱"
-                    onChangeText={(t) =>
-                      setFormData({ ...formData, displayName: t })
-                    }
                     value={formData.displayName}
+                    onChangeText={(t) => {
+                      setFormData({ ...formData, displayName: t });
+                      if (errors.displayName) {
+                        setErrors((prev) => {
+                          const { displayName, ...rest } = prev;
+                          return rest;
+                        });
+                      }
+                    }}
                   />
                   <Pen color={isLight ? "#000" : "#fff"} />
                 </View>
@@ -266,9 +279,16 @@ export default function SignUp() {
                     <TextInput
                       style={styles.inputFrame}
                       placeholder="您的姓氏"
-                      onChangeText={(t) =>
-                        setFormData({ ...formData, lastName: t })
-                      }
+                      value={formData.lastName}
+                      onChangeText={(t) => {
+                        setFormData({ ...formData, lastName: t });
+                        if (errors.name) {
+                          setErrors((prev) => {
+                            const { name, ...rest } = prev;
+                            return rest;
+                          });
+                        }
+                      }}
                     />
                   </View>
                   <View style={[styles.inputGroup, { flex: 2 }]}>
@@ -276,9 +296,16 @@ export default function SignUp() {
                     <TextInput
                       style={styles.inputFrame}
                       placeholder="您的名字"
-                      onChangeText={(t) =>
-                        setFormData({ ...formData, firstName: t })
-                      }
+                      value={formData.firstName}
+                      onChangeText={(t) => {
+                        setFormData({ ...formData, firstName: t });
+                        if (errors.name) {
+                          setErrors((prev) => {
+                            const { name, ...rest } = prev;
+                            return rest;
+                          });
+                        }
+                      }}
                     />
                   </View>
                 </View>
@@ -380,7 +407,17 @@ export default function SignUp() {
                 <TextInput
                   style={styles.textInput}
                   placeholder="example@email.com"
-                  onChangeText={(t) => setFormData({ ...formData, email: t })}
+                  value={formData.email}
+                  onChangeText={(t) => {
+                    setFormData({ ...formData, email: t });
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (errors.email && emailRegex.test(t)) {
+                      setErrors((prev) => {
+                        const { email, ...rest } = prev;
+                        return rest;
+                      });
+                    }
+                  }}
                 />
               </View>
               <ErrorTip msg={errors.email} />
@@ -390,9 +427,18 @@ export default function SignUp() {
                   style={styles.textInput}
                   placeholder="輸入密碼"
                   secureTextEntry={!passWord}
-                  onChangeText={(t) =>
-                    setFormData({ ...formData, password: t })
-                  }
+                  value={formData.password}
+                  onChangeText={(t) => {
+                    setFormData({ ...formData, password: t });
+                    const passRegex =
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                    if (errors.password && passRegex.test(t)) {
+                      setErrors((prev) => {
+                        const { password, ...rest } = prev;
+                        return rest;
+                      });
+                    }
+                  }}
                 />
                 <Pressable onPress={() => showPassWord(!passWord)}>
                   {passWord ? (
@@ -411,15 +457,31 @@ export default function SignUp() {
                 <TextInput
                   style={styles.textInput}
                   placeholder="輸入密碼"
-                  secureTextEntry={!comfirmPassWord}
-                  onChangeText={(t) =>
-                    setFormData({ ...formData, confirmPassword: t })
-                  }
+                  secureTextEntry={!confirmPassword}
+                  value={formData.confirmPassword}
+                  onChangeText={(t) => {
+                    const newFormData = { ...formData, confirmPassword: t };
+                    setFormData(newFormData);
+
+                    const passRegex =
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+                    if (
+                      errors.confirmPassword &&
+                      passRegex.test(t) &&
+                      t === formData.password
+                    ) {
+                      setErrors((prev) => {
+                        const { confirmPassword, ...rest } = prev;
+                        return rest;
+                      });
+                    }
+                  }}
                 />
                 <Pressable
-                  onPress={() => showcomfirmPassWord(!comfirmPassWord)}
+                  onPress={() => showconfirmPassword(!confirmPassword)}
                 >
-                  {comfirmPassWord ? (
+                  {confirmPassword ? (
                     <Eye color={isLight ? "#000" : "#fff"} size={20} />
                   ) : (
                     <EyeClosed color={isLight ? "#000" : "#fff"} size={20} />
@@ -442,7 +504,18 @@ export default function SignUp() {
                     style={styles.textInput}
                     keyboardType="number-pad"
                     placeholder="09xx-xxx-xxx"
-                    onChangeText={(t) => setFormData({ ...formData, phone: t })}
+                    value={formData.phone}
+                    maxLength={10}
+                    onChangeText={(t) => {
+                      setFormData({ ...formData, phone: t });
+                      const phoneRegex = /^09\d{8}$/;
+                      if (errors.phone && phoneRegex.test(t)) {
+                        setErrors((prev) => {
+                          const { phone, ...rest } = prev;
+                          return rest;
+                        });
+                      }
+                    }}
                   />
                 </View>
                 <ErrorTip msg={errors.phone} />
