@@ -397,6 +397,8 @@ export const getStyles = (theme) => {
       width: 100,
       height: 100,
       borderRadius: 50,
+      borderWidth: 1,
+      borderColor: "#bababa",
     },
     cameraBtn: {
       position: "absolute",

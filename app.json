@@ -19,10 +19,7 @@
     "android": {
       "package": "com.linfeng.larp410"
     },
-    "plugins": [
-      "expo-router",
-      "@react-native-community/datetimepicker"
-    ],
+    "plugins": ["expo-router", "@react-native-community/datetimepicker"],
     "extra": {
       "router": {},
       "eas": {

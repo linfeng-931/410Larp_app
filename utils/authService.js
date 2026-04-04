@@ -1,29 +1,30 @@
-import auth from "@react-native-firebase/auth";
-import firestore from "@react-native-firebase/firestore";
+import { auth, db } from "../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
-export const signUp = async (email, password, extraData) => {
+export const checkSignUp = async (email, password, extraData) => {
   try {
-    const response = await auth().createUserWithEmailAndPassword(
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
       email,
       password,
     );
-    await firestore().collection("users").doc(response.user.uid).set({
-      uid: response.user.uid,
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
       displayName: extraData.displayName,
       firstName: extraData.firstName,
       lastName: extraData.lastName,
       gender: extraData.gender,
       birthday: extraData.birthday,
       phone: extraData.phone,
-      createdAt: firestore.FieldValue.serverTimestamp(),
+      photoURL: extraData.profilePhoto || "",
+      createdAt: serverTimestamp(),
     });
-    return response.user;
+
+    return user;
   } catch (error) {
     throw error;
   }
 };
-
-export const login = (email, password) =>
-  auth().signInWithEmailAndPassword(email, password);
-
-export const resetPassword = (email) => auth().sendPasswordResetEmail(email);

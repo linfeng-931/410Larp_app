@@ -8,11 +8,12 @@ import {
   Platform,
   Image,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import { getStyles } from "../../utils/styleFormat";
 import { useFonts } from "expo-font";
-import Images from "../../assets/images/images";
 import { pickImage } from "../../utils/photoHandler";
+import { checkSignUp } from "../../utils/authService";
 import { Stack, router } from "expo-router";
 import { useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -29,6 +30,9 @@ import {
   Square,
   Phone,
   Calendar,
+  Ellipsis,
+  EyeClosed,
+  Eye,
 } from "lucide-react-native";
 
 export default function SignUp() {
@@ -41,6 +45,9 @@ export default function SignUp() {
   const [photo, setPhoto] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
+  const [loading, setLoading] = useState(false);
+  const [passWord, showPassWord] = useState(false);
+  const [comfirmPassWord, showcomfirmPassWord] = useState(false);
   const [formData, setFormData] = useState({
     uid: "",
     displayName: "",
@@ -53,12 +60,16 @@ export default function SignUp() {
     confirmPassword: "",
     phone: "",
     agreeTerms: false,
+    profilePhoto: "",
   });
 
   // 圖片
   const handleSelectPhoto = async () => {
     const base64String = await pickImage();
-    setPhoto(base64String);
+    if (base64String) {
+      setPhoto(base64String);
+      setFormData((prev) => ({ ...prev, profilePhoto: base64String }));
+    }
   };
 
   // 日期
@@ -108,9 +119,26 @@ export default function SignUp() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSignUp = () => {
+  //   資料上傳
+  const handleSignUp = async () => {
     if (validate()) {
-      console.log("註冊資料：", formData);
+      setLoading(true);
+      try {
+        await checkSignUp(formData.email, formData.password, formData);
+
+        Alert.alert("註冊成功", "歡迎來到推理之旅！", [
+          { text: "確定", onPress: () => router.push("/subPage/Home") },
+        ]);
+      } catch (error) {
+        console.log(error.code);
+        if (error.code === "auth/email-already-in-use") {
+          Alert.alert("註冊失敗", "該電子郵件已被使用。");
+        } else {
+          Alert.alert("註冊失敗", error.message);
+        }
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -212,6 +240,7 @@ export default function SignUp() {
                     onChangeText={(t) =>
                       setFormData({ ...formData, displayName: t })
                     }
+                    value={formData.displayName}
                   />
                   <Pen color={isLight ? "#000" : "#fff"} />
                 </View>
@@ -350,28 +379,45 @@ export default function SignUp() {
               <ErrorTip msg={errors.email} />
 
               <View style={styles.inputFrame}>
-                <Lock color={isLight ? "#000" : "#fff"} size={20} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="輸入密碼"
-                  secureTextEntry
+                  secureTextEntry={!passWord}
                   onChangeText={(t) =>
                     setFormData({ ...formData, password: t })
                   }
                 />
+                <Pressable onPress={() => showPassWord(!passWord)}>
+                  {passWord ? (
+                    <Eye color={isLight ? "#000" : "#fff"} size={20} />
+                  ) : (
+                    <EyeClosed color={isLight ? "#000" : "#fff"} size={20} />
+                  )}
+                </Pressable>
               </View>
               <ErrorTip msg={errors.password} />
+              <Text style={styles.content2}>
+                請設定 8 位以上密碼，需包含大小寫字母、數字及特殊符號
+              </Text>
               <Text style={styles.content1}>確認密碼</Text>
               <View style={styles.inputFrame}>
-                <Lock color={isLight ? "#000" : "#fff"} size={20} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="輸入密碼"
-                  secureTextEntry
+                  secureTextEntry={!comfirmPassWord}
                   onChangeText={(t) =>
                     setFormData({ ...formData, confirmPassword: t })
                   }
                 />
+                <Pressable
+                  onPress={() => showcomfirmPassWord(!comfirmPassWord)}
+                >
+                  {comfirmPassWord ? (
+                    <Eye color={isLight ? "#000" : "#fff"} size={20} />
+                  ) : (
+                    <EyeClosed color={isLight ? "#000" : "#fff"} size={20} />
+                  )}
+                </Pressable>
               </View>
               <ErrorTip msg={errors.confirmPassword} />
             </View>
@@ -432,6 +478,7 @@ export default function SignUp() {
             {/* Sign Up */}
             <Pressable
               onPress={handleSignUp}
+              disabled={loading}
               style={({ pressed }) => ({
                 width: "100%",
                 maxWidth: 338,
@@ -450,9 +497,13 @@ export default function SignUp() {
                 elevation: 5,
               })}
             >
-              <Text style={{ fontSize: 16, color: "#fff", fontWeight: 900 }}>
-                註冊
-              </Text>
+              {loading ? (
+                <Ellipsis color="#fff" />
+              ) : (
+                <Text style={{ fontSize: 16, color: "#fff", fontWeight: 900 }}>
+                  註冊
+                </Text>
+              )}
             </Pressable>
           </View>
         </ScrollView>
