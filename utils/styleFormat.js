@@ -57,7 +57,7 @@ export const getStyles = (theme) => {
 
     //font
     bigTitle: {
-      fontSize: 40,
+      fontSize: 36,
       marginTop: 20,
       marginBottom: 40,
       fontFamily: "ChFont",
@@ -69,7 +69,7 @@ export const getStyles = (theme) => {
       color: primaryColor,
     },
     bigTitleNormal: {
-      fontSize: 40,
+      fontSize: 36,
       fontWeight: 700,
       color: primaryColor,
     },
@@ -312,6 +312,7 @@ export const getStyles = (theme) => {
       height: 60,
       alignItems: "center",
       borderRadius: 8,
+      color: isLight ? "#000" : "#fff",
     },
 
     //SearchFrame
@@ -388,6 +389,79 @@ export const getStyles = (theme) => {
       gap: 16,
       backgroundColor: isLight ? `${colors.color1}26` : `${colors.color3}26`,
       borderRadius: 8,
+    },
+
+    // 註冊
+    avatarContainer: { alignSelf: "center", marginVertical: 20 },
+    avatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+    },
+    cameraBtn: {
+      position: "absolute",
+      bottom: 0,
+      right: 0,
+      backgroundColor: "#FFA000",
+      padding: 6,
+      borderRadius: 15,
+    },
+    emptyAvatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: `${primaryColor}26`,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    textInput: {
+      fontSize: 16,
+      flex: 1,
+      height: "100%",
+      paddingVertical: 8,
+      color: isLight ? "#000" : "#fff",
+    },
+    radioRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginRight: 30,
+      gap: 16,
+    },
+    radioCircle: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: "#FFA000",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    radioInner: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: "#FFA000",
+    },
+    iosPickerContainer: {
+      backgroundColor: isLight ? "#fff" : "#1A1A1A",
+      borderTopColor: isLight ? "#bababa" : "#333",
+      borderColor: isLight ? "#bababa" : "#333",
+      borderWidth: 1,
+      paddingBottom: 20,
+      borderRadius: 15,
+      marginTop: 10,
+      overflow: "hidden",
+    },
+    toolbar: {
+      height: 44,
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      backgroundColor: isLight ? "rgb(225, 225, 225)aba" : "#262626",
+      borderBottomWidth: 1,
+      borderBottomColor: isLight ? "#bababa" : "#333",
     },
   });
 };

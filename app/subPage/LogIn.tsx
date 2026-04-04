@@ -5,6 +5,7 @@ import {
   Text,
   TextInput,
   Pressable,
+  Platform,
 } from "react-native";
 import { getStyles } from "../../utils/styleFormat";
 import { useFonts } from "expo-font";
@@ -35,7 +36,7 @@ export default function LogIn() {
       setEmailError("請輸入電子郵件");
       isValid = false;
     } else if (!emailRegex.test(email)) {
-      setEmailError("郵箱格式不正確");
+      setEmailError("電子郵件格式不正確");
       isValid = false;
     } else {
       setEmailError("");
@@ -69,7 +70,15 @@ export default function LogIn() {
         source={Images[colorScheme].LogIn}
       >
         {/* Header */}
-        <View style={{ alignItems: "center", gap: 8 }}>
+        <View
+          style={{
+            alignItems: "center",
+            gap: Platform.select({
+              ios: 8,
+              android: -8,
+            }),
+          }}
+        >
           <Text style={styles.logInTitle}>LogIn</Text>
           <Text style={styles.content3}>開啟你的推理之旅</Text>
         </View>
@@ -93,13 +102,7 @@ export default function LogIn() {
                 placeholder="example@email.com"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                style={{
-                  fontSize: 16,
-                  flex: 1,
-                  height: "100%",
-                  paddingVertical: 8,
-                  color: isLight ? "#000" : "#fff",
-                }}
+                style={styles.textInput}
               />
             </View>
             {emailError ? (
@@ -135,13 +138,7 @@ export default function LogIn() {
                 value={password}
                 placeholder="輸入密碼"
                 secureTextEntry
-                style={{
-                  fontSize: 16,
-                  flex: 1,
-                  height: "100%",
-                  paddingVertical: 8,
-                  color: isLight ? "#000" : "#fff",
-                }}
+                style={styles.textInput}
               />
             </View>
             {passwordError ? (
@@ -199,7 +196,7 @@ export default function LogIn() {
             登入
           </Text>
         </Pressable>
-        <Pressable onPress={() => router.push("/subPage/Home")}>
+        <Pressable onPress={() => router.push("/subPage/SignUp")}>
           {({ pressed }) => (
             <View style={{ flexDirection: "row", gap: 8 }}>
               <Text style={styles.content1}>尚未加入?</Text>

@@ -1,0 +1,462 @@
+import {
+  View,
+  useColorScheme,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  Platform,
+  Image,
+  KeyboardAvoidingView,
+} from "react-native";
+import { getStyles } from "../../utils/styleFormat";
+import { useFonts } from "expo-font";
+import Images from "../../assets/images/images";
+import { pickImage } from "../../utils/photoHandler";
+import { Stack, router } from "expo-router";
+import { useRef } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import {
+  Mail,
+  Lock,
+  CircleAlert,
+  Camera,
+  User,
+  Pen,
+  SquareCheck,
+  Square,
+  Phone,
+  Calendar,
+} from "lucide-react-native";
+
+export default function SignUp() {
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
+  const isLight = colorScheme === "light";
+  const scrollRef = useRef(null);
+
+  //   表單輸入
+  const [photo, setPhoto] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [formData, setFormData] = useState({
+    uid: "",
+    displayName: "",
+    firstName: "",
+    lastName: "",
+    gender: "male",
+    birthday: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    agreeTerms: false,
+  });
+
+  // 圖片
+  const handleSelectPhoto = async () => {
+    const base64String = await pickImage();
+    setPhoto(base64String);
+  };
+
+  // 日期
+  const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(Platform.OS === "ios");
+    setDate(currentDate);
+
+    const formattedDate = `${currentDate.getFullYear()}/${(currentDate.getMonth() + 1).toString().padStart(2, "0")}/${currentDate.getDate().toString().padStart(2, "0")}`;
+    setFormData({ ...formData, birthday: formattedDate });
+  };
+
+  //   錯誤驗證
+  const [errors, setErrors] = useState({});
+  const validate = () => {
+    let newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const phoneRegex = /^09\d{8}$/;
+
+    if (!formData.displayName) newErrors.displayName = "請輸入ID名稱";
+    if (!formData.firstName || !formData.lastName)
+      newErrors.name = "請輸入姓名";
+
+    if (!formData.birthday) newErrors.birthday = "請選擇生日";
+
+    if (!formData.email) newErrors.email = "請輸入電子郵件";
+    else if (!emailRegex.test(formData.email))
+      newErrors.email = "電子郵件格式錯誤";
+
+    if (!formData.password) newErrors.password = "請輸入密碼";
+    else if (!passRegex.test(formData.password))
+      newErrors.password = "密碼格式不符";
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "密碼不一致";
+
+    if (!formData.phone) newErrors.phone = "請輸入手機號碼";
+    else if (!phoneRegex.test(formData.phone)) newErrors.phone = "手機格式錯誤";
+
+    if (!formData.agreeTerms) newErrors.terms = "請勾選同意條款";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    }
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSignUp = () => {
+    if (validate()) {
+      console.log("註冊資料：", formData);
+    }
+  };
+
+  // 錯誤訊息
+  const ErrorTip = ({ msg }) =>
+    msg ? (
+      <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+        <CircleAlert color="#ff3131" size={12} />
+        <Text style={styles.warnText}>{msg}</Text>
+      </View>
+    ) : null;
+
+  /* 文字載入 */
+  let [fontsLoaded] = useFonts({
+    Nobills: require("../../assets/fonts/PostNoBills.ttf"),
+    ChFont: require("../../assets/fonts/ChFont.ttf"),
+  });
+  if (!fontsLoaded) return null;
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={[styles.container, { gap: 32 }]}
+          showsVerticalScrollIndicator={false}
+          ref={scrollRef}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <View
+            style={{
+              alignItems: "center",
+              gap: Platform.select({
+                ios: 8,
+                android: -8,
+              }),
+            }}
+          >
+            <Text style={styles.logInTitle}>Create Account</Text>
+            <Pressable onPress={() => router.push("/subPage/LogIn")}>
+              {({ pressed }) => (
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <Text style={styles.content1}>已有帳號?</Text>
+                  <Text
+                    style={{
+                      color: pressed ? "#e69303" : "#FFA000",
+                      fontSize: 16,
+                      fontWeight: "600",
+                      textDecorationLine: "underline",
+                    }}
+                  >
+                    點此登入
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
+          {/* Form Area */}
+          <View style={{ width: "100%", paddingHorizontal: 32, gap: 32 }}>
+            {/* Profile */}
+            <View style={{ gap: 16 }}>
+              <Text style={[styles.content1, { fontWeight: 600 }]}>
+                個人資料
+              </Text>
+              <Pressable
+                style={styles.avatarContainer}
+                onPress={handleSelectPhoto}
+              >
+                {photo ? (
+                  <Image source={{ uri: photo }} style={styles.avatar} />
+                ) : (
+                  <View style={styles.emptyAvatar}>
+                    <User
+                      color={isLight ? "#000" : "#fff"}
+                      opacity={0.8}
+                      size={36}
+                    />
+                  </View>
+                )}
+                <View style={styles.cameraBtn}>
+                  <Camera color="#fff" size={16} />
+                </View>
+              </Pressable>
+              {/* UserName(Unreal) */}
+              <View style={{ gap: 8 }}>
+                <Text style={styles.content1}>名稱</Text>
+                <View style={[styles.inputFrame]}>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="輸入ID名稱"
+                    onChangeText={(t) =>
+                      setFormData({ ...formData, displayName: t })
+                    }
+                  />
+                  <Pen color={isLight ? "#000" : "#fff"} />
+                </View>
+                <Text style={styles.content2}>用於群組的ID名稱</Text>
+                <ErrorTip msg={errors.displayName} />
+              </View>
+              {/* UserName(Real) */}
+              <View style={{ gap: 12 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    width: "100%",
+                    maxWidth: 338,
+                    gap: 16,
+                  }}
+                >
+                  <View style={[styles.inputGroup, { flex: 1 }]}>
+                    <Text style={styles.content1}>姓</Text>
+                    <TextInput
+                      style={styles.inputFrame}
+                      placeholder="您的姓氏"
+                      onChangeText={(t) =>
+                        setFormData({ ...formData, lastName: t })
+                      }
+                    />
+                  </View>
+                  <View style={[styles.inputGroup, { flex: 2 }]}>
+                    <Text style={styles.content1}>名</Text>
+                    <TextInput
+                      style={styles.inputFrame}
+                      placeholder="您的名字"
+                      onChangeText={(t) =>
+                        setFormData({ ...formData, firstName: t })
+                      }
+                    />
+                  </View>
+                </View>
+                <ErrorTip msg={errors.name} />
+                <Text style={styles.content2}>
+                  請填寫真實姓名，需與遊戲外送時核對身份
+                </Text>
+              </View>
+              {/* Gender */}
+              <View style={{ gap: 12, marginTop: 8 }}>
+                <Text style={styles.content1}>性別</Text>
+                <View style={{ flexDirection: "row", gap: 48 }}>
+                  <Pressable
+                    style={styles.radioRow}
+                    onPress={() => setFormData({ ...formData, gender: "male" })}
+                  >
+                    <View style={styles.radioCircle}>
+                      {formData.gender === "male" && (
+                        <View style={styles.radioInner} />
+                      )}
+                    </View>
+                    <Text style={styles.content1}>先生</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.radioRow}
+                    onPress={() =>
+                      setFormData({ ...formData, gender: "female" })
+                    }
+                  >
+                    <View style={styles.radioCircle}>
+                      {formData.gender === "female" && (
+                        <View style={styles.radioInner} />
+                      )}
+                    </View>
+                    <Text style={styles.content1}>女士</Text>
+                  </Pressable>
+                </View>
+              </View>
+              {/* Birthday */}
+              <View style={{ gap: 8 }}>
+                <Text style={styles.content1}>生日</Text>
+                <Pressable
+                  style={styles.inputFrame}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text
+                    style={[
+                      {
+                        flex: 1,
+                      },
+                      styles.content1,
+                    ]}
+                  >
+                    {formData.birthday || "YYYY/MM/DD"}
+                  </Text>
+                  <Calendar color={isLight ? "#000" : "#fff"} size={20} />
+                </Pressable>
+                {showDatePicker && (
+                  <View
+                    style={
+                      Platform.OS === "ios" ? styles.iosPickerContainer : null
+                    }
+                  >
+                    {Platform.OS === "ios" && (
+                      <View style={styles.toolbar}>
+                        <Pressable onPress={() => setShowDatePicker(false)}>
+                          <Text
+                            style={{
+                              color: "#FFA000",
+                              fontWeight: "bold",
+                              fontSize: 16,
+                            }}
+                          >
+                            完成
+                          </Text>
+                        </Pressable>
+                      </View>
+                    )}
+                    <DateTimePicker
+                      value={date}
+                      mode="date"
+                      display="spinner"
+                      onChange={onDateChange}
+                      textColor={isLight ? "#000" : "#fff"}
+                    />
+                  </View>
+                )}
+                <ErrorTip msg={errors.birthday} />
+              </View>
+            </View>
+            {/* Account */}
+            <View style={{ gap: 16 }}>
+              <Text style={styles.content1}>帳號</Text>
+              <View style={styles.inputFrame}>
+                <Mail color={isLight ? "#000" : "#fff"} size={20} />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="example@email.com"
+                  onChangeText={(t) => setFormData({ ...formData, email: t })}
+                />
+              </View>
+              <ErrorTip msg={errors.email} />
+
+              <View style={styles.inputFrame}>
+                <Lock color={isLight ? "#000" : "#fff"} size={20} />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="輸入密碼"
+                  secureTextEntry
+                  onChangeText={(t) =>
+                    setFormData({ ...formData, password: t })
+                  }
+                />
+              </View>
+              <ErrorTip msg={errors.password} />
+              <Text style={styles.content1}>確認密碼</Text>
+              <View style={styles.inputFrame}>
+                <Lock color={isLight ? "#000" : "#fff"} size={20} />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="輸入密碼"
+                  secureTextEntry
+                  onChangeText={(t) =>
+                    setFormData({ ...formData, confirmPassword: t })
+                  }
+                />
+              </View>
+              <ErrorTip msg={errors.confirmPassword} />
+            </View>
+            {/* Contact */}
+            <View style={{ gap: 16 }}>
+              <Text style={[styles.content1, { fontWeight: 600 }]}>
+                聯絡資料
+              </Text>
+              {/* UserName(Unreal) */}
+              <View style={{ gap: 8 }}>
+                <Text style={styles.content1}>手機</Text>
+                <View style={[styles.inputFrame]}>
+                  <Phone color={isLight ? "#000" : "#fff"} />
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="09xx-xxx-xxx"
+                    onChangeText={(t) => setFormData({ ...formData, phone: t })}
+                  />
+                </View>
+                <ErrorTip msg={errors.phone} />
+              </View>
+            </View>
+            {/* Check Policy */}
+            <Pressable
+              onPress={() =>
+                setFormData({ ...formData, agreeTerms: !formData.agreeTerms })
+              }
+              style={{ flexDirection: "row", gap: 16, alignItems: "center" }}
+            >
+              {formData.agreeTerms ? (
+                <SquareCheck fill="#FFA000" size={24} />
+              ) : (
+                <Square color="#666" size={24} />
+              )}
+              <Text
+                style={[styles.content1, { flexWrap: "wrap", width: "100%" }]}
+              >
+                我已閱讀並同意天空中娛樂股份有限公司的{" "}
+                <Pressable>
+                  {({ pressed }) => (
+                    <View style={{ flexDirection: "row", gap: 8 }}>
+                      <Text style={styles.content1}>尚未加入?</Text>
+                      <Text
+                        style={{
+                          color: pressed ? "#e69303" : "#FFA000",
+                          fontSize: 16,
+                          fontWeight: "600",
+                          textDecorationLine: "underline",
+                        }}
+                      >
+                        使用條款與申明
+                      </Text>
+                    </View>
+                  )}
+                </Pressable>
+              </Text>
+            </Pressable>
+            {/* Sign Up */}
+            <Pressable
+              onPress={handleSignUp}
+              style={({ pressed }) => ({
+                width: "100%",
+                maxWidth: 338,
+                height: 60,
+                backgroundColor: pressed ? "#e69303" : "#FFA000",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 8,
+                // iOS 陰影
+                shadowColor: "#000",
+                shadowOpacity: 0.15,
+                shadowRadius: 4,
+                shadowOffset: { width: 0, height: 0 },
+
+                // Android 陰影
+                elevation: 5,
+              })}
+            >
+              <Text style={{ fontSize: 16, color: "#fff", fontWeight: 900 }}>
+                註冊
+              </Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
