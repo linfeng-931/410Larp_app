@@ -9,7 +9,7 @@ export default function Page() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace("subPage/Home");
+      router.replace("subPage/LogIn");
     }, 2000);
 
     return () => clearTimeout(timer);

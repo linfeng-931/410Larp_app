@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { colors } from "./colors";
 
 export const getStyles = (theme) => {
-  const isLight = theme === 'light';
+  const isLight = theme === "light";
   const primaryColor = isLight ? colors.color2 : colors.color3;
   const oppositeColor = isLight ? colors.color3 : colors.color2;
 
@@ -19,18 +19,25 @@ export const getStyles = (theme) => {
     main: {
       flex: 1,
       paddingTop: 42,
-      width: '100%',
-      alignItems: 'center',
+      width: "100%",
+      alignItems: "center",
       gap: 16,
     },
-
+    logInContainer: {
+      paddingTop: 64,
+      width: "100%",
+      height: "100%",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 32,
+    },
     //header
     header: {
-      width: '100%',
+      width: "100%",
       paddingHorizontal: 32,
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexDirection: 'row',
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexDirection: "row",
     },
     headerButton: {
       backgroundColor: `${colors.color3}BF`,
@@ -40,9 +47,9 @@ export const getStyles = (theme) => {
       borderRadius: 30,
 
       //iOS 陰影
-      shadowOffset: { width: 0, height: 3 }, 
-      shadowOpacity: 0.12, 
-      shadowRadius: 6, 
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
 
       //Android
       elevation: 6,
@@ -53,7 +60,12 @@ export const getStyles = (theme) => {
       fontSize: 40,
       marginTop: 20,
       marginBottom: 40,
-      fontFamily: 'ChFont',
+      fontFamily: "ChFont",
+      color: primaryColor,
+    },
+    logInTitle: {
+      fontSize: 48,
+      fontFamily: "ChFont",
       color: primaryColor,
     },
     bigTitleNormal: {
@@ -68,30 +80,34 @@ export const getStyles = (theme) => {
     },
     content1: {
       color: primaryColor,
-      fontSize: 14,
+      fontSize: 16,
     },
     content2: {
       color: primaryColor,
-      fontSize: 14,
+      fontSize: 16,
       opacity: 0.8,
     },
     content3: {
       color: primaryColor,
-      fontSize: 14,
+      fontSize: 16,
       opacity: 0.4,
     },
     content4: {
       color: primaryColor,
-      fontSize: 10,
+      fontSize: 14,
       opacity: 0.8,
     },
+    warnText: {
+      color: "#ff3131",
+      fontSize: 14,
+    },
     btn: {
-      backgroundColor: '#ffffff',
+      backgroundColor: "#ffffff",
       borderRadius: 8,
       paddingVertical: 12,
       paddingHorizontal: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       marginTop: 30,
       marginBottom: 10,
 
@@ -105,17 +121,16 @@ export const getStyles = (theme) => {
       elevation: 5,
     },
 
-
     //footer
     iconBtn: {
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       color: colors.color1,
     },
     iconBtnDisact: {
       opacity: 0.6,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       color: primaryColor,
     },
     roundedBtn: {
@@ -130,98 +145,98 @@ export const getStyles = (theme) => {
       color: oppositeColor,
     },
     footer: {
-      flexDirection: 'row',
-      position: 'absolute',
+      flexDirection: "row",
+      position: "absolute",
       bottom: 0,
       left: 0,
       right: 0,
       height: 80,
-      width: '100%',
+      width: "100%",
       padding: 20,
       backgroundColor: oppositeColor,
       shadowColor: colors.color2,
       shadowOpacity: 0.1,
       shadowOffset: { width: 0, height: -3 },
       shadowRadius: 5,
-      justifyContent: 'space-around',
-      alignItems: 'center',
+      justifyContent: "space-around",
+      alignItems: "center",
       borderRadius: 30,
     },
 
     //-------------------------------------components-------------------------------------
     star: {
-      flexDirection: 'row',
+      flexDirection: "row",
     },
 
     //card
     card: {
-      flexDirection: 'column',
+      flexDirection: "column",
       backgroundColor: isLight ? oppositeColor : `${primaryColor}26`,
       borderRadius: 16,
-      overflow: 'hidden',
+      overflow: "hidden",
       minHeight: 450,
       width: "82%",
     },
     cardHorizantal: {
-      flexDirection: 'row',
+      flexDirection: "row",
       backgroundColor: isLight ? oppositeColor : `${primaryColor}26`,
       borderRadius: 16,
-      overflow: 'hidden',
+      overflow: "hidden",
       minHeight: 216,
       width: 320,
     },
     cardContentContainer: {
-      top: '50%',
+      top: "50%",
       paddingBottom: 32,
       paddingHorizontal: 15,
       gap: 12,
     },
     cardContentContainerHorizantal: {
-      left: '45%',
-      width: '55%',
+      left: "45%",
+      width: "55%",
       paddingBottom: 32,
       paddingHorizontal: 15,
       paddingVertical: 15,
-      justifyContent: 'center',
+      justifyContent: "center",
       gap: 12,
     },
     cardContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 16,
     },
     cardIcon: {
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       color: primaryColor,
       opacity: 0.9,
     },
     bottomCroppedImage: {
-      position: 'absolute',
+      position: "absolute",
       left: 0,
       right: 0,
       bottom: 0,
-      height: '80%',
-      top: '-35%',
-      resizeMode: 'cover',
+      height: "80%",
+      top: "-35%",
+      resizeMode: "cover",
     },
     leftCroppedImage: {
-      position: 'absolute',
+      position: "absolute",
       left: 0,
-      height: '100%',
-      width: '45%',
-      resizeMode: 'cover',
+      height: "100%",
+      width: "45%",
+      resizeMode: "cover",
     },
     cardTagContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
+      flexDirection: "row",
+      flexWrap: "wrap",
       gap: 8,
     },
     cardTag: {
       backgroundColor: `${primaryColor}26`,
       padding: 3,
       width: 90,
-      textAlign: 'center',
+      textAlign: "center",
       borderRadius: 4,
       paddingVertical: 5,
       color: primaryColor,
@@ -229,7 +244,7 @@ export const getStyles = (theme) => {
     cardTagHorizantal: {
       backgroundColor: `${primaryColor}26`,
       width: 68,
-      textAlign: 'center',
+      textAlign: "center",
       borderRadius: 4,
       paddingVertical: 5,
       fontSize: 10,
@@ -239,17 +254,17 @@ export const getStyles = (theme) => {
       backgroundColor: colors.color1,
       padding: 3,
       width: 74,
-      textAlign: 'center',
+      textAlign: "center",
       borderRadius: 4,
       paddingVertical: 5,
       color: primaryColor,
       fontSize: 10,
     },
     cardTagTypeHorizantal: {
-      position: 'absolute',
+      position: "absolute",
       backgroundColor: colors.color1,
       width: 72,
-      textAlign: 'center',
+      textAlign: "center",
       color: primaryColor,
       fontSize: 10,
       paddingVertical: 6,
@@ -258,16 +273,16 @@ export const getStyles = (theme) => {
 
     //PaginationBar
     scrollBarList: {
-      flexDirection: 'column',
-      alignItems: 'center',
+      flexDirection: "column",
+      alignItems: "center",
       height: 490,
     },
     list: {
-      alignItems: 'center',
+      alignItems: "center",
       gap: 16,
     },
     dotContainer: {
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: 8,
     },
     dot: {
@@ -286,17 +301,29 @@ export const getStyles = (theme) => {
       borderColor: colors.color1,
       backgroundColor: colors.color1,
     },
+    //inputFrame
+    inputFrame: {
+      backgroundColor: `${primaryColor}26`,
+      width: "100%",
+      maxWidth: 338,
+      paddingHorizontal: 16,
+      flexDirection: "row",
+      gap: 24,
+      height: 60,
+      alignItems: "center",
+      borderRadius: 8,
+    },
 
     //SearchFrame
     searchFrame: {
       backgroundColor: `${primaryColor}26`,
-      width: '100%',
+      width: "100%",
       padding: 16,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
+      flexDirection: "row",
+      flexWrap: "wrap",
       gap: 24,
       height: 60,
-      alignItems: 'center',
+      alignItems: "center",
       borderRadius: 8,
     },
     dropdownContainer: {
@@ -307,7 +334,7 @@ export const getStyles = (theme) => {
     //SelectFrame
     selectFrame: {
       backgroundColor: `${primaryColor}26`,
-      width: '100%',
+      width: "100%",
       paddingHorizontal: 16,
       gap: 24,
       borderRadius: 8,
@@ -317,12 +344,12 @@ export const getStyles = (theme) => {
     selectTag: {
       backgroundColor: colors.color1,
       width: 82,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       borderRadius: 4,
       paddingVertical: 8,
       fontSize: 10,
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: 8,
     },
     selectTagFont: {
@@ -334,33 +361,33 @@ export const getStyles = (theme) => {
       color: oppositeColor,
     },
     topButton: {
-      position: 'absolute',
+      position: "absolute",
       bottom: 100,
       right: 15,
-      backgroundColor: isLight? `${colors.color3}BF`: `${colors.color4}D9`,
+      backgroundColor: isLight ? `${colors.color3}BF` : `${colors.color4}D9`,
       borderWidth: 1,
       borderColor: oppositeColor,
       padding: 15,
       borderRadius: 30,
 
       //iOS 陰影
-      shadowOffset: { width: 0, height: 3 }, 
-      shadowOpacity: 0.12, 
-      shadowRadius: 6, 
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
 
       //Android
       elevation: 6,
     },
 
     //id
-    priceContainer:{
-      width: '100%',
+    priceContainer: {
+      width: "100%",
       paddingVertical: 24,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       gap: 16,
-      backgroundColor: isLight? `${colors.color1}26`:`${colors.color3}26`,
+      backgroundColor: isLight ? `${colors.color1}26` : `${colors.color3}26`,
       borderRadius: 8,
     },
-  })
+  });
 };
