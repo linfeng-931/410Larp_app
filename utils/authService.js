@@ -3,8 +3,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  onAuthStateChanged,
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
 export const checkSignUp = async (email, password, extraData) => {
   try {
@@ -25,6 +26,7 @@ export const checkSignUp = async (email, password, extraData) => {
       phone: extraData.phone,
       photoURL: extraData.profilePhoto || "",
       createdAt: serverTimestamp(),
+      appointments: [],
     });
 
     return user;
@@ -53,4 +55,22 @@ export const resetPassword = async (email) => {
   } catch (error) {
     throw error;
   }
+};
+
+export const fetchUserData = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      console.log("找不到文件！");
+    }
+  }
+};
+
+export const subscribeToAuthChanges = (callback) => {
+  return onAuthStateChanged(auth, callback);
 };

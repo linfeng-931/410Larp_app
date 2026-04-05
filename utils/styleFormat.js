@@ -97,6 +97,17 @@ export const getStyles = (theme) => {
       fontSize: 14,
       opacity: 0.8,
     },
+    content5: {
+      color: primaryColor,
+      fontSize: 24,
+      opacity: 0.4,
+      fontWeight: 600,
+    },
+    content6: {
+      color: primaryColor,
+      fontSize: 24,
+      fontWeight: 600,
+    },
     warnText: {
       color: "#ff3131",
       fontSize: 14,
