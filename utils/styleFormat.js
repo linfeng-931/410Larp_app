@@ -1,5 +1,6 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import { colors } from "./colors";
+const { width } = Dimensions.get("window");
 
 export const getStyles = (theme) => {
   const isLight = theme === "light";
@@ -107,6 +108,10 @@ export const getStyles = (theme) => {
       color: primaryColor,
       fontSize: 24,
       fontWeight: 600,
+    },
+    content7: {
+      color: "#FFA000",
+      fontSize: 16,
     },
     warnText: {
       color: "#ff3131",
@@ -475,6 +480,50 @@ export const getStyles = (theme) => {
       backgroundColor: isLight ? "rgb(225, 225, 225)aba" : "#262626",
       borderBottomWidth: 1,
       borderBottomColor: isLight ? "#bababa" : "#333",
+    },
+
+    // Weekly
+    indicator: {
+      position: "absolute",
+      bottom: 0,
+      width: (width - 128) / 7,
+      height: 3,
+      backgroundColor: "#FFA000",
+      borderRadius: 2,
+    },
+    dayItem: {
+      flex: 1,
+      alignItems: "center",
+      height: 80,
+      justifyContent: "center",
+    },
+    dateBox: {
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 6,
+    },
+    selectedBox: {
+      backgroundColor: isLight ? "rgba(255,160,0,0.15)" : "rgba(255,160,0,0.4)",
+      borderRadius: 12,
+      paddingVertical: 10,
+      width: "100%",
+      height: "100%",
+      alignItems: "center",
+    },
+    indicator: {
+      position: "absolute",
+      bottom: 0,
+      width: (width - 40) / 7,
+      height: 3,
+      backgroundColor: "#FFA000",
+      borderRadius: 2,
+    },
+    dot: {
+      width: 6,
+      height: 6,
+      backgroundColor: "#FFA000",
+      borderRadius: 3,
+      marginTop: 4,
     },
   });
 };

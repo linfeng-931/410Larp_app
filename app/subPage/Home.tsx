@@ -15,6 +15,7 @@ import Images from "../../assets/images/images";
 import { Stack, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect } from "react";
+import Weekly from "../../components/Weekly";
 import Footer from "../../components/Footer";
 import { useFonts } from "expo-font";
 import { useUser } from "../../utils/userContext";
@@ -24,6 +25,7 @@ import { User } from "lucide-react-native";
 export default function Home() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const isLight = colorScheme === "light";
 
   const { user, loading } = useUser();
 
@@ -43,9 +45,16 @@ export default function Home() {
           {loading ? (
             <ActivityIndicator size="large" />
           ) : (
-            <View>
+            <View style={{ gap: 32 }}>
               {/* Header */}
-              <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 {/* Greeting */}
                 <View style={{ gap: 4 }}>
                   <Text
@@ -59,18 +68,25 @@ export default function Home() {
                 {user.photoURL ? (
                   <Image
                     source={{ uri: user.photoURL }}
-                    style={styles.avatar}
+                    style={[styles.avatar, { maxWidth: 48, maxHeight: 48 }]}
                   />
                 ) : (
-                  <View style={styles.emptyAvatar}>
+                  <View
+                    style={[
+                      styles.emptyAvatar,
+                      { maxWidth: 48, maxHeight: 48 },
+                    ]}
+                  >
                     <User
                       color={isLight ? "#000" : "#fff"}
                       opacity={0.8}
-                      size={36}
+                      size={24}
                     />
                   </View>
                 )}
               </View>
+              {/* Weekly */}
+              <Weekly />
             </View>
           )}
         </ScrollView>
