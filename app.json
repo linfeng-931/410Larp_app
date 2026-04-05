@@ -16,6 +16,7 @@
         "ITSAppUsesNonExemptEncryption": false
       }
     },
+    "orientation": "portrait",
     "android": {
       "package": "com.linfeng.larp410"
     },

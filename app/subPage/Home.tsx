@@ -2,9 +2,7 @@ import {
   View,
   useColorScheme,
   Text,
-  TextInput,
-  Pressable,
-  Platform,
+  FlatList,
   ScrollView,
   ActivityIndicator,
   Image,
@@ -16,6 +14,8 @@ import { Stack, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect } from "react";
 import Weekly from "../../components/Weekly";
+import HomeBtn from "../../components/HomeBtn";
+import Payment from "../../components/Payment";
 import Footer from "../../components/Footer";
 import { useFonts } from "expo-font";
 import { useUser } from "../../utils/userContext";
@@ -28,6 +28,10 @@ export default function Home() {
   const isLight = colorScheme === "light";
 
   const { user, loading } = useUser();
+  const data = [
+    { btnName: "查找野團", route: "/subPage/Home", id: "1" },
+    { btnName: "你的揪團", route: "/subPage/Home", id: "2" },
+  ];
 
   /* 文字載入 */
   let [fontsLoaded] = useFonts({
@@ -45,7 +49,7 @@ export default function Home() {
           {loading ? (
             <ActivityIndicator size="large" />
           ) : (
-            <View style={{ gap: 32 }}>
+            <View style={{ gap: 24 }}>
               {/* Header */}
               <View
                 style={{
@@ -87,6 +91,26 @@ export default function Home() {
               </View>
               {/* Weekly */}
               <Weekly />
+              {/* Appoint */}
+              {/* Payment */}
+              <Payment />
+              {/* Other */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  gap: 24,
+                }}
+              >
+                {data.map((item) => (
+                  <HomeBtn
+                    key={item.id}
+                    path={item.route}
+                    name={item.btnName}
+                  />
+                ))}
+              </View>
             </View>
           )}
         </ScrollView>

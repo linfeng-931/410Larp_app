@@ -81,7 +81,7 @@ export default function Weekly() {
   if (!fontsLoaded) return null;
 
   return (
-    <View style={{ gap: 4 }}>
+    <View style={{ gap: 6 }}>
       <Pressable onPress={goToToday}>
         {({ pressed }) => (
           <View
@@ -147,6 +147,7 @@ export default function Weekly() {
                 >
                   {item.dayName}
                 </Text>
+
                 {hasApp && <View style={styles.dot} />}
               </View>
             </Pressable>
