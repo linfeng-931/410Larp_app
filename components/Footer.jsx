@@ -13,7 +13,7 @@ import { colors } from "../utils/colors";
 
 export default function Footer({ page }) {
   const router = useRouter();
-  const colorScheme = "useColorScheme()";
+  const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
 
   return (
@@ -26,7 +26,7 @@ export default function Footer({ page }) {
             opacity: pressed ? 0.5 : 1,
           })}
           onPress={() => {
-            router.replace("/");
+            router.replace("/subPage/Home");
           }}
         >
           <Home size={24} style={styles.iconBtnDisact} />
