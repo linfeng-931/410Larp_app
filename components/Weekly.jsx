@@ -6,12 +6,13 @@ import {
   Animated,
   Dimensions,
 } from "react-native";
+import PagerView from "react-native-pager-view";
+import { startOfWeek, addDays, subDays, isSameDay } from "date-fns";
 import { getStyles } from "../utils/styleFormat";
 import { useUser } from "../utils/userContext";
 import { useFonts } from "expo-font";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Undo2 } from "lucide-react-native";
-import { colors } from "../utils/colors";
 
 const { width } = Dimensions.get("window");
 
@@ -20,45 +21,47 @@ export default function Weekly() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const isLight = colorScheme === "light";
+
+  // 初始化時間
+  const now = new Date();
+  const todayDate = now.toISOString().slice(0, 10);
+
+  const [baseDate, setBaseDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(todayDate);
-  const translateX = useRef(new Animated.Value(0)).current; // 下划線
+  const translateX = useRef(new Animated.Value(0)).current;
 
   const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-  // 取得本週
-  const getWeeklyData = () => {
-    const now = new Date();
-    const week = [];
-
-    const sunday = new Date(now);
-    sunday.setDate(now.getDate() - now.getDay());
-
-    for (let i = 0; i < 7; i++) {
-      const tempDate = new Date(sunday);
-      tempDate.setDate(sunday.getDate() + i);
-
-      week.push({
-        fullDate: tempDate.toISOString().slice(0, 10),
-        dateNum: tempDate.getDate(),
-        dayName: dayNames[tempDate.getDay()],
-      });
-    }
-    return week;
+  // 取得週
+  const generateWeek = (date) => {
+    const start = startOfWeek(date);
+    return Array.from({ length: 7 }).map((_, i) => {
+      const d = addDays(start, i);
+      return {
+        fullDate: d.toISOString().slice(0, 10),
+        dateNum: d.getDate(),
+        dayName: dayNames[d.getDay()],
+      };
+    });
   };
 
-  const weekData = getWeeklyData();
+  const pages = [
+    generateWeek(subDays(baseDate, 7)),
+    generateWeek(baseDate),
+    generateWeek(addDays(baseDate, 7)),
+  ];
 
-  // 今天日期
-  const now = new Date();
-  const date = now.getDate();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-  const formatMonth = String(month).padStart(2, "0");
-  const formatDate = String(date).padStart(2, "0");
+  const onPageSelected = (e) => {
+    const index = e.nativeEvent.position;
+    if (index === 0) {
+      setBaseDate(subDays(baseDate, 7));
+      translateX.setValue(0);
+    } else if (index === 2) {
+      setBaseDate(addDays(baseDate, 7));
+      translateX.setValue(0);
+    }
+  };
 
-  const todayDate = `${year}-${formatMonth}-${formatDate}`;
-
-  // 日期選擇
   const handleSelect = (fullDate, index) => {
     setSelectedDate(fullDate);
     const itemWidth = (width - 40) / 7;
@@ -69,8 +72,10 @@ export default function Weekly() {
   };
 
   const goToToday = () => {
-    const todayIndex = weekData.findIndex((d) => d.fullDate === todayDate);
-    if (todayIndex !== -1) handleSelect(todayDate, todayIndex);
+    setBaseDate(new Date());
+    setSelectedDate(todayDate);
+    const todayIndex = new Date().getDay();
+    handleSelect(todayDate, todayIndex);
   };
 
   /* 文字載入 */
@@ -108,51 +113,69 @@ export default function Weekly() {
           </View>
         )}
       </Pressable>
-      <View
-        style={[
-          {
-            height: 100,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            position: "relative",
-          },
-        ]}
-      >
-        <Animated.View
-          style={[styles.indicator, { transform: [{ translateX }] }]}
-        />
-        {weekData.map((item, index) => {
-          const isSelected = item.fullDate === selectedDate;
-          const isToday = item.fullDate === todayDate;
-          const hasApp = user?.appointments?.some(
-            (a) => a.date === item.fullDate,
-          );
-          return (
-            <Pressable
-              key={index}
-              onPress={() => handleSelect(item.fullDate, index)}
-              style={styles.dayItem}
-            >
-              <View style={[styles.dateBox, isSelected && styles.selectedBox]}>
-                <Text style={[styles.content6, isToday && styles.todayText]}>
-                  {item.dateNum}
-                </Text>
-                <Text
-                  style={[
-                    { fontWeight: 600 },
-                    isLight ? styles.content3 : styles.content4,
-                    isSelected && { color: "#FFA000", opacity: 1 },
-                  ]}
-                >
-                  {item.dayName}
-                </Text>
 
-                {hasApp && <View style={styles.dot} />}
-              </View>
-            </Pressable>
-          );
-        })}
+      <View style={{ height: 110 }}>
+        <PagerView
+          style={{ flex: 1 }}
+          initialPage={1}
+          onPageSelected={onPageSelected}
+          key={baseDate.toISOString()}
+        >
+          {pages.map((week, pIndex) => (
+            <View
+              key={pIndex}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                position: "relative",
+                paddingHorizontal: 0,
+              }}
+            >
+              {pIndex === 1 && (
+                <Animated.View
+                  style={[styles.indicator, { transform: [{ translateX }] }]}
+                />
+              )}
+
+              {week.map((item, index) => {
+                const isSelected = item.fullDate === selectedDate;
+                const isToday = item.fullDate === todayDate;
+                const hasApp = user?.appointments?.some(
+                  (a) => a.date === item.fullDate,
+                );
+
+                return (
+                  <Pressable
+                    key={index}
+                    onPress={() => handleSelect(item.fullDate, index)}
+                    style={styles.dayItem}
+                  >
+                    <View
+                      style={[styles.dateBox, isSelected && styles.selectedBox]}
+                    >
+                      <Text
+                        style={[styles.content6, isToday && styles.todayText]}
+                      >
+                        {item.dateNum}
+                      </Text>
+                      <Text
+                        style={[
+                          { fontWeight: "600" },
+                          isLight ? styles.content3 : styles.content4,
+                          isSelected && { color: "#FFA000", opacity: 1 },
+                        ]}
+                      >
+                        {item.dayName}
+                      </Text>
+                      {hasApp && <View style={styles.dot} />}
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
+        </PagerView>
       </View>
     </View>
   );
