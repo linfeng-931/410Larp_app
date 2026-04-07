@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  ActivityIndicator,
-  Image,
-} from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Image } from "react-native";
 
 import { Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -55,15 +49,13 @@ export default function Home() {
               >
                 {/* Greeting */}
                 <View style={{ gap: 4 }}>
-                  <Text
-                    style={[styles.content5, { textTransform: "capitalize" }]}
-                  >
+                  <Text style={[styles.content5]}>
                     Hello {user?.displayName || "訪客"}
                   </Text>
                   <Text style={styles.content6}>查看今天的推理之旅</Text>
                 </View>
                 {/* Profile */}
-                {user.photoURL ? (
+                {user?.photoURL ? (
                   <Image
                     source={{ uri: user.photoURL }}
                     style={[styles.avatar, { maxWidth: 48, maxHeight: 48 }]}

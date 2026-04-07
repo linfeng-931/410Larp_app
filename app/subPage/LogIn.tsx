@@ -18,14 +18,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useRef } from "react";
 import { Mail, Lock, CircleAlert } from "lucide-react-native";
 import { checkSignIn } from "../../utils/authService";
+import { useUser } from "../../utils/userContext";
 import LottieView from "lottie-react-native";
-import { useAppStyles } from "../../utils/useAppStyles";
 
 export default function LogIn() {
-  const { styles, isLight, colorScheme } = useAppStyles();
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
+  const isLight = colorScheme === "light";
   const animationRef = useRef(null);
   const loadingAnimation = require("../../assets/animation/Loading.json");
   const scrollRef = useRef(null);
+  const { setUser, setGuest } = useUser();
+
   // 表單狀態
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -119,7 +123,7 @@ export default function LogIn() {
                 }),
               }}
             >
-              <Text style={styles.logInTitle}>Log In</Text>
+              <Text style={styles.logInTitle}>LogIn</Text>
               <Text style={styles.content3}>開啟你的推理之旅</Text>
             </View>
             {/* Form Area */}
@@ -146,7 +150,6 @@ export default function LogIn() {
                     }}
                     value={email}
                     placeholder="example@email.com"
-                    placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                     keyboardType="email-address"
                     autoCapitalize="none"
                     style={styles.textInput}
@@ -187,7 +190,6 @@ export default function LogIn() {
                     }}
                     value={password}
                     placeholder="輸入密碼"
-                    placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                     secureTextEntry
                     style={styles.textInput}
                   />
@@ -285,7 +287,13 @@ export default function LogIn() {
                 borderTopColor: "#bababa",
               }}
             >
-              {/* <Pressable onPress={() => router.push("/subPage/Home")}>
+              <Pressable
+                onPress={() => {
+                  setUser(null);
+                  setGuest(true);
+                  router.push("/subPage/Home");
+                }}
+              >
                 {({ pressed }) => (
                   <View style={{ flexDirection: "row", gap: 8 }}>
                     <Text
@@ -300,7 +308,7 @@ export default function LogIn() {
                     </Text>
                   </View>
                 )}
-              </Pressable> */}
+              </Pressable>
             </View>
           </ImageBackground>
         </ScrollView>

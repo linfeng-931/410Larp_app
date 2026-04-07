@@ -258,7 +258,11 @@ export default function SignUp() {
                   <TextInput
                     style={styles.textInput}
                     placeholder="輸入ID名稱"
-                    placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
+                    placeholderTextColor={
+                      isLight
+                        ? "rgba(0, 0, 0, 0.4)"
+                        : "rgba(255, 255, 255, 0.4)"
+                    }
                     value={formData.displayName}
                     onChangeText={(t) => {
                       setFormData({ ...formData, displayName: t });
@@ -290,7 +294,11 @@ export default function SignUp() {
                     <TextInput
                       style={styles.inputFrame}
                       placeholder="您的姓氏"
-                      placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
+                      placeholderTextColor={
+                        isLight
+                          ? "rgba(0, 0, 0, 0.4)"
+                          : "rgba(255, 255, 255, 0.4)"
+                      }
                       value={formData.lastName}
                       onChangeText={(t) => {
                         setFormData({ ...formData, lastName: t });
@@ -308,7 +316,11 @@ export default function SignUp() {
                     <TextInput
                       style={styles.inputFrame}
                       placeholder="您的名字"
-                      placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
+                      placeholderTextColor={
+                        isLight
+                          ? "rgba(0, 0, 0, 0.4)"
+                          : "rgba(255, 255, 255, 0.4)"
+                      }
                       value={formData.firstName}
                       onChangeText={(t) => {
                         setFormData({ ...formData, firstName: t });
@@ -420,7 +432,9 @@ export default function SignUp() {
                 <TextInput
                   style={styles.textInput}
                   placeholder="example@email.com"
-                  placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
+                  placeholderTextColor={
+                    isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)"
+                  }
                   value={formData.email}
                   onChangeText={(t) => {
                     setFormData({ ...formData, email: t });
@@ -440,7 +454,9 @@ export default function SignUp() {
                 <TextInput
                   style={styles.textInput}
                   placeholder="輸入密碼"
-                  placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
+                  placeholderTextColor={
+                    isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)"
+                  }
                   secureTextEntry={!passWord}
                   value={formData.password}
                   onChangeText={(t) => {
@@ -472,7 +488,9 @@ export default function SignUp() {
                 <TextInput
                   style={styles.textInput}
                   placeholder="輸入密碼"
-                  placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
+                  placeholderTextColor={
+                    isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)"
+                  }
                   secureTextEntry={!confirmPassword}
                   value={formData.confirmPassword}
                   onChangeText={(t) => {
@@ -520,7 +538,11 @@ export default function SignUp() {
                     style={styles.textInput}
                     keyboardType="number-pad"
                     placeholder="09xx-xxx-xxx"
-                    placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
+                    placeholderTextColor={
+                      isLight
+                        ? "rgba(0, 0, 0, 0.4)"
+                        : "rgba(255, 255, 255, 0.4)"
+                    }
                     value={formData.phone}
                     maxLength={10}
                     onChangeText={(t) => {
@@ -540,9 +562,10 @@ export default function SignUp() {
             </View>
             {/* Check Policy */}
             <Pressable
-              onPress={() =>
-                setFormData({ ...formData, agreeTerms: !formData.agreeTerms })
-              }
+              onPress={() => {
+                Keyboard.dismiss();
+                setFormData({ ...formData, agreeTerms: !formData.agreeTerms });
+              }}
               style={{ flexDirection: "row", gap: 16, alignItems: "center" }}
             >
               {formData.agreeTerms ? (

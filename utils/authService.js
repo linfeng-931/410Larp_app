@@ -6,7 +6,13 @@ import {
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+  deleteDoc,
+} from "firebase/firestore";
 
 export const checkSignUp = async (email, password, extraData) => {
   try {
@@ -25,7 +31,6 @@ export const checkSignUp = async (email, password, extraData) => {
       gender: extraData.gender,
       birthday: extraData.birthday,
       phone: extraData.phone,
-      email: extraData.email, //幫我加個email我好像猜錯了
       photoURL: extraData.profilePhoto || "",
       createdAt: serverTimestamp(),
       appointments: [],
@@ -87,18 +92,19 @@ export const logout = async () => {
 
 export const checkDeleteAccount = async () => {
   const user = auth.currentUser;
+  if (!user) throw new Error("no-user");
 
-  if (user) {
-    try {
-      await deleteDoc(doc(db, "users", user.uid));
+  try {
+    const userDocRef = doc(db, "users", user.uid);
+    await deleteDoc(userDocRef);
+    console.log("Firestore 資料已刪除");
 
-      await deleteUser(user);
-      
-      console.log("帳號已成功刪除");
-    } catch (error) {
-      throw error;
-    }
-  } else {
-    throw new Error("找不到目前登入的用戶");
+    await user.delete();
+    console.log("Auth 帳號已刪除");
+
+    return true;
+  } catch (error) {
+    console.error("checkDeleteAccount 發生錯誤:", error.code);
+    throw error;
   }
 };

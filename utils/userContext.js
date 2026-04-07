@@ -7,6 +7,7 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [user, setUser] = useState(null);
+  const [isGuest, setGuest] = useState(false);
   const [loading, setLoading] = useState(true);
   const refreshUserData = async () => {
     try {
@@ -34,7 +35,15 @@ export const UserProvider = ({ children }) => {
 
   return (
     <UserContext.Provider
-      value={{ user, firebaseUser, loading, refreshUserData }}
+      value={{
+        user,
+        setUser,
+        isGuest,
+        setGuest,
+        firebaseUser,
+        loading,
+        refreshUserData,
+      }}
     >
       {children}
     </UserContext.Provider>
