@@ -70,9 +70,20 @@ export default function SignUp() {
   // 圖片
   const handleSelectPhoto = async () => {
     const base64String = await pickImage();
+
     if (base64String) {
+      if (base64String.length > 300000) {
+        Alert.alert("檔案太大請選擇其他照片");
+        return;
+      }
+
       setPhoto(base64String);
       setFormData((prev) => ({ ...prev, profilePhoto: base64String }));
+
+      setErrors((prev) => {
+        const { profilePhoto, ...rest } = prev;
+        return rest;
+      });
     }
   };
 
