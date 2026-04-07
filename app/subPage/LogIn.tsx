@@ -274,6 +274,33 @@ export default function LogIn() {
                 </View>
               )}
             </Pressable>
+            <View
+              style={{
+                alignItems: "center",
+                paddingTop: 24,
+                width: "100%",
+                maxWidth: 338,
+                borderTopWidth: 1,
+                borderTopColor: "#bababa",
+              }}
+            >
+              {/* <Pressable onPress={() => router.push("/subPage/Home")}>
+                {({ pressed }) => (
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <Text
+                      style={{
+                        color: !pressed ? "#bababa" : "#FFA000",
+                        fontSize: 16,
+                        fontWeight: "600",
+                        textDecorationLine: "underline",
+                      }}
+                    >
+                      訪客登入
+                    </Text>
+                  </View>
+                )}
+              </Pressable> */}
+            </View>
           </ImageBackground>
         </ScrollView>
       </KeyboardAvoidingView>

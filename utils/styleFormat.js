@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Dimensions, Platform } from "react-native";
 import { colors } from "./colors";
 const { width } = Dimensions.get("window");
 
@@ -381,7 +381,10 @@ export const getStyles = (theme) => {
       position: "absolute",
       bottom: 100,
       right: 15,
-      backgroundColor: isLight ? `${colors.color3}BF` : `${colors.color4}D9`,
+      backgroundColor: Platform.select({
+        ios: isLight ? `${colors.color3}BF` : `${colors.color4}D9`,
+        android: isLight ? "#FFFFFF" : colors.color4, // Android 用純色
+      }),
       borderWidth: 1,
       borderColor: oppositeColor,
       padding: 15,
