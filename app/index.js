@@ -8,14 +8,17 @@ export default function Page() {
   const { user, loading } = useUser();
   const animationRef = useRef(null);
   const colorScheme = useColorScheme();
-
   useEffect(() => {
     if (!loading) {
-      if (user) {
-        router.replace("subPage/Home");
-      } else {
-        router.replace("subPage/LogIn");
-      }
+      const timer = setTimeout(() => {
+        if (user) {
+          router.replace("subPage/Home");
+        } else {
+          router.replace("subPage/LogIn");
+        }
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
   }, [loading, user]);
 
