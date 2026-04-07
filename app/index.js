@@ -3,11 +3,12 @@ import { useEffect, useRef } from "react";
 import { router } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useUser } from "../utils/userContext";
+import { useAppStyles } from "../utils/useAppStyles";
 
 export default function Page() {
   const { user, loading } = useUser();
   const animationRef = useRef(null);
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useAppStyles();
   useEffect(() => {
     if (!loading) {
       const timer = setTimeout(() => {

@@ -19,11 +19,10 @@ import Images from "../../assets/images/images";
 import { Mail, CircleAlert } from "lucide-react-native";
 import LottieView from "lottie-react-native";
 import { resetPassword } from "../../utils/authService";
+import { useAppStyles } from "../../utils/useAppStyles";
 
 export default function ForgetPassword() {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  const isLight = colorScheme === "light";
+  const { styles, isLight } = useAppStyles();
   const animationRef = useRef(null);
   const loadingAnimation = require("../../assets/animation/Loading.json");
   const scrollRef = useRef(null);

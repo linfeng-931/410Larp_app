@@ -1,12 +1,10 @@
-import { View, useColorScheme, Text, Pressable } from "react-native";
-import { getStyles } from "../utils/styleFormat";
-import { useFonts } from "expo-font";
+import { View, Text, Pressable } from "react-native";
 import { ScanLine, QrCode } from "lucide-react-native";
+import { useAppStyles } from "../utils/useAppStyles";
 
 export default function Payment() {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  const isLight = colorScheme === "light";
+  const { styles, isLight } = useAppStyles();
+
   return (
     <View
       style={{

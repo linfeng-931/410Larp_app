@@ -2,6 +2,8 @@ import { View, Pressable, useColorScheme } from "react-native";
 import { useRouter } from "expo-router";
 import { getStyles } from "../utils/styleFormat";
 import { FontAwesome } from "@expo/vector-icons";
+import { useAppStyles } from "../utils/useAppStyles";
+
 import {
   Home,
   LibraryBig,
@@ -13,8 +15,7 @@ import { colors } from "../utils/colors";
 
 export default function Footer({ page }) {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const { styles, isLight } = useAppStyles();
 
   return (
     <View style={styles.footer}>
@@ -74,7 +75,7 @@ export default function Footer({ page }) {
             opacity: pressed ? 0.5 : 1,
           })}
           onPress={() => {
-            router.push("/subPage/myBook");
+            router.push("/subPage/Setting");
           }}
         >
           <Settings size={24} style={styles.iconBtnDisact} />
