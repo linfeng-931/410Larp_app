@@ -12,6 +12,7 @@ import Images from "../../assets/images/images";
 import { Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useRef } from "react";
+import { useAppStyles } from "../../utils/useAppStyles";
 
 import PaginationBar from "../../components/PaginationBar";
 import Btn from "../../components/Btn";
@@ -23,8 +24,7 @@ import StoriesList from "../../components/StoriesList";
 import ScrollTop from "../../components/ScrollTop";
 
 export default function Library() {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const { styles, colorScheme } = useAppStyles();
   const scrollRef = useRef(null);
 
   /* 狀態控制 */

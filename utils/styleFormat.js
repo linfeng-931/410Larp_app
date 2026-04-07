@@ -66,7 +66,7 @@ export const getStyles = (theme) => {
     },
     logInTitle: {
       fontSize: 48,
-      fontFamily: "ChFont",
+      fontFamily: "Nobills",
       color: primaryColor,
     },
     bigTitleNormal: {
@@ -527,6 +527,14 @@ export const getStyles = (theme) => {
       backgroundColor: "#FFA000",
       borderRadius: 3,
       marginTop: 4,
+    },
+
+    //Setting
+    settingCard: {
+      backgroundColor: isLight ? oppositeColor : `${primaryColor}26`,
+      borderRadius: 8,
+      width: "100%",
+      paddingHorizontal: 16,
     },
   });
 };

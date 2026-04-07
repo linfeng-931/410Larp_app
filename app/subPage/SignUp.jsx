@@ -36,11 +36,10 @@ import {
   Eye,
 } from "lucide-react-native";
 import LottieView from "lottie-react-native";
+import { useAppStyles } from "../../utils/useAppStyles";
 
 export default function SignUp() {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  const isLight = colorScheme === "light";
+  const { styles, isLight } = useAppStyles();
   const scrollRef = useRef(null);
   const animationRef = useRef(null);
   const loadingAnimation = require("../../assets/animation/Loading.json");
@@ -259,6 +258,7 @@ export default function SignUp() {
                   <TextInput
                     style={styles.textInput}
                     placeholder="輸入ID名稱"
+                    placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                     value={formData.displayName}
                     onChangeText={(t) => {
                       setFormData({ ...formData, displayName: t });
@@ -272,7 +272,7 @@ export default function SignUp() {
                   />
                   <Pen color={isLight ? "#000" : "#fff"} />
                 </View>
-                <Text style={styles.content2}>用於群組的ID名稱</Text>
+                <Text style={styles.content3}>用於群組的ID名稱</Text>
                 <ErrorTip msg={errors.displayName} />
               </View>
               {/* UserName(Real) */}
@@ -290,6 +290,7 @@ export default function SignUp() {
                     <TextInput
                       style={styles.inputFrame}
                       placeholder="您的姓氏"
+                      placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                       value={formData.lastName}
                       onChangeText={(t) => {
                         setFormData({ ...formData, lastName: t });
@@ -307,6 +308,7 @@ export default function SignUp() {
                     <TextInput
                       style={styles.inputFrame}
                       placeholder="您的名字"
+                      placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                       value={formData.firstName}
                       onChangeText={(t) => {
                         setFormData({ ...formData, firstName: t });
@@ -321,7 +323,7 @@ export default function SignUp() {
                   </View>
                 </View>
                 <ErrorTip msg={errors.name} />
-                <Text style={styles.content2}>
+                <Text style={styles.content3}>
                   請填寫真實姓名，需與遊戲外送時核對身份
                 </Text>
               </View>
@@ -418,6 +420,7 @@ export default function SignUp() {
                 <TextInput
                   style={styles.textInput}
                   placeholder="example@email.com"
+                  placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                   value={formData.email}
                   onChangeText={(t) => {
                     setFormData({ ...formData, email: t });
@@ -437,6 +440,7 @@ export default function SignUp() {
                 <TextInput
                   style={styles.textInput}
                   placeholder="輸入密碼"
+                  placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                   secureTextEntry={!passWord}
                   value={formData.password}
                   onChangeText={(t) => {
@@ -460,7 +464,7 @@ export default function SignUp() {
                 </Pressable>
               </View>
               <ErrorTip msg={errors.password} />
-              <Text style={styles.content2}>
+              <Text style={styles.content3}>
                 請設定 8 位以上密碼，需包含大小寫字母、數字及特殊符號
               </Text>
               <Text style={styles.content1}>確認密碼</Text>
@@ -468,6 +472,7 @@ export default function SignUp() {
                 <TextInput
                   style={styles.textInput}
                   placeholder="輸入密碼"
+                  placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                   secureTextEntry={!confirmPassword}
                   value={formData.confirmPassword}
                   onChangeText={(t) => {
@@ -515,6 +520,7 @@ export default function SignUp() {
                     style={styles.textInput}
                     keyboardType="number-pad"
                     placeholder="09xx-xxx-xxx"
+                    placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                     value={formData.phone}
                     maxLength={10}
                     onChangeText={(t) => {

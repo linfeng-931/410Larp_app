@@ -1,31 +1,25 @@
 import {
   View,
-  useColorScheme,
   Text,
-  FlatList,
   ScrollView,
   ActivityIndicator,
   Image,
 } from "react-native";
 
-import { getStyles } from "../../utils/styleFormat";
-import Images from "../../assets/images/images";
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
 import Weekly from "../../components/Weekly";
 import HomeBtn from "../../components/HomeBtn";
 import Payment from "../../components/Payment";
 import Footer from "../../components/Footer";
 import { useFonts } from "expo-font";
 import { useUser } from "../../utils/userContext";
+import { useAppStyles } from "../../utils/useAppStyles";
 
 import { User } from "lucide-react-native";
 
 export default function Home() {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  const isLight = colorScheme === "light";
+  const { styles, isLight } = useAppStyles();
 
   const { user, loading } = useUser();
   const data = [

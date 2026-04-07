@@ -19,11 +19,10 @@ import { useState, useRef } from "react";
 import { Mail, Lock, CircleAlert } from "lucide-react-native";
 import { checkSignIn } from "../../utils/authService";
 import LottieView from "lottie-react-native";
+import { useAppStyles } from "../../utils/useAppStyles";
 
 export default function LogIn() {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  const isLight = colorScheme === "light";
+  const { styles, isLight, colorScheme } = useAppStyles();
   const animationRef = useRef(null);
   const loadingAnimation = require("../../assets/animation/Loading.json");
   const scrollRef = useRef(null);
@@ -120,7 +119,7 @@ export default function LogIn() {
                 }),
               }}
             >
-              <Text style={styles.logInTitle}>LogIn</Text>
+              <Text style={styles.logInTitle}>Log In</Text>
               <Text style={styles.content3}>開啟你的推理之旅</Text>
             </View>
             {/* Form Area */}
@@ -147,6 +146,7 @@ export default function LogIn() {
                     }}
                     value={email}
                     placeholder="example@email.com"
+                    placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                     keyboardType="email-address"
                     autoCapitalize="none"
                     style={styles.textInput}
@@ -187,6 +187,7 @@ export default function LogIn() {
                     }}
                     value={password}
                     placeholder="輸入密碼"
+                    placeholderTextColor={isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)" }
                     secureTextEntry
                     style={styles.textInput}
                   />

@@ -8,19 +8,17 @@ import {
 } from "react-native";
 import PagerView from "react-native-pager-view";
 import { startOfWeek, addDays, subDays, isSameDay } from "date-fns";
-import { getStyles } from "../utils/styleFormat";
 import { useUser } from "../utils/userContext";
 import { useFonts } from "expo-font";
 import { useState, useRef, useEffect } from "react";
 import { Undo2 } from "lucide-react-native";
+import { useAppStyles } from "../utils/useAppStyles";
 
 const { width } = Dimensions.get("window");
 
 export default function Weekly() {
   const { user } = useUser();
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  const isLight = colorScheme === "light";
+  const { styles, isLight } = useAppStyles();
 
   // 初始化時間
   const now = new Date();
