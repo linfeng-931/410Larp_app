@@ -25,6 +25,7 @@ export const checkSignUp = async (email, password, extraData) => {
 
     await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
+      email: email,
       displayName: extraData.displayName,
       firstName: extraData.firstName,
       lastName: extraData.lastName,
