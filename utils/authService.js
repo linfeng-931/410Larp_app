@@ -5,6 +5,9 @@ import {
   sendPasswordResetEmail,
   onAuthStateChanged,
   signOut,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
 } from "firebase/auth";
 import {
   doc,
@@ -12,7 +15,9 @@ import {
   getDoc,
   serverTimestamp,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
+import { savePassword, getPassword } from "./secureStorage";
 
 export const checkSignUp = async (email, password, extraData) => {
   try {
@@ -44,6 +49,48 @@ export const checkSignUp = async (email, password, extraData) => {
   }
 };
 
+export const checkPersonalDetailUpdate = async (extraData) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("用戶未登入");
+
+    const userRef = doc(db, "users", user.uid);
+
+    await updateDoc(userRef, {
+      displayName: extraData.displayName,
+      firstName: extraData.firstName,
+      lastName: extraData.lastName,
+      gender: extraData.gender,
+      birthday: extraData.birthday,
+      photoURL: extraData.profilePhoto || "",
+      createdAt: serverTimestamp(),
+      appointments: [],
+    });
+
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+export const checkContactUpdate = async (extraData) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("用戶未登入");
+
+    const userRef = doc(db, "users", user.uid);
+
+    await updateDoc(userRef, {
+      phone: extraData,
+      createdAt: serverTimestamp(),
+      appointments: [],
+    });
+
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const checkSignIn = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(
@@ -51,6 +98,7 @@ export const checkSignIn = async (email, password) => {
       email,
       password,
     );
+    await savePassword("user_pwd", password);
 
     return userCredential.user;
   } catch (error) {
@@ -107,6 +155,40 @@ export const checkDeleteAccount = async () => {
     return true;
   } catch (error) {
     console.error("checkDeleteAccount 發生錯誤:", error.code);
+    throw error;
+  }
+};
+
+export const changeUserPassword = async (newPassword, currentPasswordInput = null) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("用戶未登入");
+
+  try {
+    const savedPassword = currentPasswordInput || await getPassword("user_pwd");
+    console.log("嘗試使用本地密碼重新驗證...");
+
+    if (!savedPassword) {
+      throw { code: 'auth/requires-recent-login' };
+    }
+
+    const credential = EmailAuthProvider.credential(user.email, savedPassword);
+    
+    try {
+      await reauthenticateWithCredential(user, credential);
+    } catch (reauthError) {
+      console.error("重新驗證失敗：", reauthError.code);
+      if (reauthError.code === 'auth/wrong-password') {
+        throw new Error("舊密碼錯誤，請重新輸入");
+      }
+      throw reauthError;
+    }
+
+    await updatePassword(user, newPassword);
+
+    await savePassword("user_pwd", newPassword);
+    
+    return true;
+  } catch (error) {
     throw error;
   }
 };

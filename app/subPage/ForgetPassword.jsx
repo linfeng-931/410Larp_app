@@ -22,7 +22,7 @@ import { resetPassword } from "../../utils/authService";
 import { useAppStyles } from "../../utils/useAppStyles";
 
 export default function ForgetPassword() {
-  const { styles, isLight } = useAppStyles();
+  const { styles, isLight, colorScheme } = useAppStyles();
   const animationRef = useRef(null);
   const loadingAnimation = require("../../assets/animation/Loading.json");
   const scrollRef = useRef(null);

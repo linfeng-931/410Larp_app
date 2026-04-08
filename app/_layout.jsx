@@ -26,6 +26,7 @@ export default function RootLayout() {
             <Stack.Screen name="subPage/myBook" />
             <Stack.Screen name="subPage/Reservation" />
             <Stack.Screen name="subPage/Setting" />
+            <Stack.Screen name="subPage/AccountSetting" />
           </Stack>
           <StatusBar style="auto" />
         </KeyboardProvider>

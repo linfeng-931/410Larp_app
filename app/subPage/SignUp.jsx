@@ -64,6 +64,7 @@ export default function SignUp() {
     phone: "",
     agreeTerms: false,
     profilePhoto: "",
+    password: "",
   });
 
   // 圖片

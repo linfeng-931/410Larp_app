@@ -120,7 +120,7 @@ export default function Setting() {
     </View>,
   ];
   const accountDetailLink = [
-    "/subPage/AccountDetail",
+    "/subPage/AccountSetting",
     "/subPage/PurchaseHistory",
   ];
 
