@@ -34,6 +34,7 @@ export const checkSignUp = async (email, password, extraData) => {
       phone: extraData.phone,
       photoURL: extraData.profilePhoto || "",
       createdAt: serverTimestamp(),
+      email: extraData.email,
       appointments: [],
     });
 

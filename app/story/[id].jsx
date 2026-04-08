@@ -21,10 +21,10 @@ import Btn from "../../components/Btn";
 import Character from "../../components/Character";
 import StoriesList from "../../components/StoriesList";
 import ScrollTop from "../../components/ScrollTop";
+import { useAppStyles } from "../../utils/useAppStyles";
 
 export default function AnItem() {
-    const colorScheme = useColorScheme();
-    const styles = getStyles(colorScheme);
+    const { styles, colorScheme } = useAppStyles();
     const scrollRef = useRef(null);
 
     const {
