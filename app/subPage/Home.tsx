@@ -34,10 +34,7 @@ export default function Home() {
         <Stack.Screen options={{ headerShown: false }} />
 
         <ScrollView style={{ padding: 20 }}>
-          {loading ? (
-            <ActivityIndicator size="large" />
-          ) : (
-            <View style={{ gap: 24 }}>
+<View style={{ gap: 24 }}>
               {/* Header */}
               <View
                 style={{
@@ -98,7 +95,6 @@ export default function Home() {
                 ))}
               </View>
             </View>
-          )}
         </ScrollView>
       </SafeAreaView>
       <Footer page={1} />

@@ -162,7 +162,7 @@ export default function AccountSetting() {
             setLoading(true);
             try {
                 await checkContactUpdate(formData.phone);
-                setFormData((prev) => ({ ...prev, phone: user.phone }));
+                setFormData((prev) => ({ ...prev, phone: formData.phone }));
                 Alert.alert("聯絡資訊更改成功！");
             } catch (error) {
                 console.log(error.code);
