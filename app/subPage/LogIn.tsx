@@ -66,6 +66,7 @@ export default function LogIn() {
       setLoading(true);
       try {
         await checkSignIn(email, password);
+        setGuest(false);
         Alert.alert("登入成功", "歡迎來到推理之旅！", [
           { text: "確定", onPress: () => router.push("/subPage/Home") },
         ]);
@@ -150,7 +151,9 @@ export default function LogIn() {
                     value={email}
                     placeholder="example@email.com"
                     placeholderTextColor={
-                      isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)"
+                      isLight
+                        ? "rgba(0, 0, 0, 0.4)"
+                        : "rgba(255, 255, 255, 0.4)"
                     }
                     keyboardType="email-address"
                     autoCapitalize="none"
@@ -193,7 +196,9 @@ export default function LogIn() {
                     value={password}
                     placeholder="輸入密碼"
                     placeholderTextColor={
-                      isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.4)"
+                      isLight
+                        ? "rgba(0, 0, 0, 0.4)"
+                        : "rgba(255, 255, 255, 0.4)"
                     }
                     secureTextEntry
                     style={styles.textInput}

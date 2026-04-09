@@ -37,12 +37,14 @@ import {
 } from "lucide-react-native";
 import LottieView from "lottie-react-native";
 import { useAppStyles } from "../../utils/useAppStyles";
+import { useUser } from "../../utils/userContext";
 
 export default function SignUp() {
   const { styles, isLight } = useAppStyles();
   const scrollRef = useRef(null);
   const animationRef = useRef(null);
   const loadingAnimation = require("../../assets/animation/Loading.json");
+  const { setGuest } = useUser();
 
   //   表單輸入
   const [photo, setPhoto] = useState(null);
@@ -64,7 +66,6 @@ export default function SignUp() {
     phone: "",
     agreeTerms: false,
     profilePhoto: "",
-    password: "",
   });
 
   // 圖片
@@ -147,7 +148,7 @@ export default function SignUp() {
       setLoading(true);
       try {
         await checkSignUp(formData.email, formData.password, formData);
-
+        setGuest(false);
         Alert.alert("註冊成功", "歡迎來到推理之旅！", [
           { text: "確定", onPress: () => router.push("/subPage/Home") },
         ]);

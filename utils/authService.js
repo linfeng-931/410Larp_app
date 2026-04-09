@@ -40,6 +40,7 @@ export const checkSignUp = async (email, password, extraData) => {
       photoURL: extraData.profilePhoto || "",
       createdAt: serverTimestamp(),
       email: extraData.email,
+      password: password,
       appointments: [],
     });
 
@@ -159,34 +160,26 @@ export const checkDeleteAccount = async () => {
   }
 };
 
-export const changeUserPassword = async (newPassword, currentPasswordInput = null) => {
+export const changeUserPassword = async (currentPassword, newPassword) => {
   const user = auth.currentUser;
   if (!user) throw new Error("用戶未登入");
 
   try {
-    const savedPassword = currentPasswordInput || await getPassword("user_pwd");
-    console.log("嘗試使用本地密碼重新驗證...");
+    const credential = EmailAuthProvider.credential(
+      user.email,
+      currentPassword,
+    );
 
-    if (!savedPassword) {
-      throw { code: 'auth/requires-recent-login' };
-    }
-
-    const credential = EmailAuthProvider.credential(user.email, savedPassword);
-    
-    try {
-      await reauthenticateWithCredential(user, credential);
-    } catch (reauthError) {
-      console.error("重新驗證失敗：", reauthError.code);
-      if (reauthError.code === 'auth/wrong-password') {
-        throw new Error("舊密碼錯誤，請重新輸入");
-      }
-      throw reauthError;
-    }
+    await reauthenticateWithCredential(user, credential);
+    console.log("重新驗證成功");
 
     await updatePassword(user, newPassword);
 
     await savePassword("user_pwd", newPassword);
-    
+
+    const userRef = doc(db, "users", user.uid);
+    await updateDoc(userRef, { password: newPassword });
+
     return true;
   } catch (error) {
     throw error;
