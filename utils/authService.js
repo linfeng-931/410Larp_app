@@ -40,7 +40,6 @@ export const checkSignUp = async (email, password, extraData) => {
       photoURL: extraData.profilePhoto || "",
       createdAt: serverTimestamp(),
       email: extraData.email,
-      password: password,
       appointments: [],
     });
 
@@ -176,9 +175,6 @@ export const changeUserPassword = async (currentPassword, newPassword) => {
     await updatePassword(user, newPassword);
 
     await savePassword("user_pwd", newPassword);
-
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, { password: newPassword });
 
     return true;
   } catch (error) {

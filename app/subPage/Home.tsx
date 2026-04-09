@@ -6,7 +6,7 @@ import Weekly from "../../components/Weekly";
 import HomeBtn from "../../components/HomeBtn";
 import Payment from "../../components/Payment";
 import Footer from "../../components/Footer";
-import { useFonts } from "expo-font";
+
 import { useUser } from "../../utils/userContext";
 import { useAppStyles } from "../../utils/useAppStyles";
 
@@ -21,17 +21,10 @@ export default function Home() {
     { btnName: "你的揪團", route: "/subPage/Home", id: "2" },
   ];
 
-  /* 文字載入 */
-  let [fontsLoaded] = useFonts({
-    Nobills: require("../../assets/fonts/PostNoBills.ttf"),
-    ChFont: require("../../assets/fonts/ChFont.ttf"),
-  });
-  if (!fontsLoaded) return null;
-
   return (
     <>
       <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-        <Stack.Screen options={{ headerShown: false }} />
+        <Stack.Screen />
 
         <ScrollView style={{ padding: 20 }}>
           <View style={{ gap: 24 }}>

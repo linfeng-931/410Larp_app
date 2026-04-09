@@ -15,7 +15,7 @@ import Images from "../../assets/images/images";
 import { Stack, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useRef } from "react";
-import { Mail, Lock, CircleAlert } from "lucide-react-native";
+import { Mail, Lock, CircleAlert, Eye, EyeClosed } from "lucide-react-native";
 import { checkSignIn } from "../../utils/authService";
 import { useUser } from "../../utils/userContext";
 import LottieView from "lottie-react-native";
@@ -33,6 +33,7 @@ export default function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [passwordShow, setPassWordShow] = useState(false);
 
   // 錯誤訊息
   const [emailError, setEmailError] = useState("");
@@ -92,16 +93,9 @@ export default function LogIn() {
     }
   };
 
-  // 文字載入
-  let [fontsLoaded] = useFonts({
-    Nobills: require("../../assets/fonts/PostNoBills.ttf"),
-    ChFont: require("../../assets/fonts/ChFont.ttf"),
-  });
-  if (!fontsLoaded) return null;
-
   return (
     <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen />
       <KeyboardAvoidingView style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={[styles.container, { gap: 32 }]}
@@ -200,9 +194,16 @@ export default function LogIn() {
                         ? "rgba(0, 0, 0, 0.4)"
                         : "rgba(255, 255, 255, 0.4)"
                     }
-                    secureTextEntry
+                    secureTextEntry={!passwordShow}
                     style={styles.textInput}
                   />
+                  <Pressable onPress={() => setPassWordShow(!passwordShow)}>
+                    {passwordShow ? (
+                      <Eye color={isLight ? "#000" : "#fff"} size={20} />
+                    ) : (
+                      <EyeClosed color={isLight ? "#000" : "#fff"} size={20} />
+                    )}
+                  </Pressable>
                 </View>
                 {passwordError ? (
                   <View
