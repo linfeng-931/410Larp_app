@@ -6,6 +6,8 @@ import {
   Switch,
   Pressable,
   Alert,
+  Modal,
+  TextInput,
 } from "react-native";
 import { logout, checkDeleteAccount } from "../../utils/authService";
 import { Stack, router } from "expo-router";
@@ -39,6 +41,9 @@ export default function Setting() {
   const scrollRef = useRef(null);
   const [checked, setChecked] = useState(false);
 
+  const [password, setPassword] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const { user, setUser, isGuest } = useUser();
   const handleLogout = async () => {
     if (isGuest) {
@@ -62,30 +67,34 @@ export default function Setting() {
       }
     }
   };
+
   const handleDeletePress = () => {
     if (isGuest) {
       Alert.alert("訪客帳號不予刪除");
       return;
     }
-    Alert.alert("刪除帳號", "這將永久刪除您的所有資料，確定要繼續嗎？", [
-      { text: "取消", style: "cancel" },
-      {
-        text: "確定刪除",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await checkDeleteAccount();
-            setUser(null);
 
-            Alert.alert("已刪除", "您的帳號與資料已從系統移除。", [
-              { text: "確定", onPress: () => router.replace("/subPage/LogIn") },
-            ]);
-          } catch (error) {
-            console.log(error.code);
-          }
-        },
-      },
-    ]);
+    setIsModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!password) {
+      Alert.alert("提示", "請輸入密碼以驗證身分");
+      return;
+    }
+
+    try {
+      await checkDeleteAccount(password);
+
+      setIsModalVisible(false);
+      setUser(null);
+      Alert.alert("已刪除", "帳號已成功移除", [
+        { text: "確定", onPress: () => router.replace("/subPage/LogIn") },
+      ]);
+    } catch (error) {
+      Alert.alert("驗證失敗", "密碼錯誤，請重新嘗試");
+      console.log(error.code);
+    }
   };
 
   const accountDetail = [
@@ -330,6 +339,74 @@ export default function Setting() {
                 link={handleDeletePress}
                 type={1}
               />
+              <Modal
+                visible={isModalVisible}
+                transparent={true}
+                animationType="fade"
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.title}>驗證身分</Text>
+                    <Text style={styles.content2}>
+                      為了安全起見，請輸入密碼以繼續：
+                    </Text>
+
+                    <TextInput
+                      style={styles.input}
+                      secureTextEntry={true}
+                      value={password}
+                      onChangeText={setPassword}
+                      placeholder="請輸入密碼"
+                    />
+
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        gap: 24,
+                        justifyContent: "space-around",
+                      }}
+                    >
+                      <Pressable
+                        onPress={() => setIsModalVisible(false)}
+                        style={{
+                          flex: 1,
+
+                          paddingVertical: 12,
+                          borderColor: isLight
+                            ? "rgba(0,0,0,0.5)"
+                            : "rgba(255,255,255,0.5)",
+                        }}
+                      >
+                        <Text
+                          style={[styles.content1, { textAlign: "center" }]}
+                        >
+                          取消
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={confirmDelete}
+                        style={{
+                          flex: 1,
+
+                          paddingVertical: 12,
+                          borderColor: isLight
+                            ? "rgba(0,0,0,0.5)"
+                            : "rgba(255,255,255,0.5)",
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.content1,
+                            { textAlign: "center", color: "#ff3131" },
+                          ]}
+                        >
+                          確定刪除
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </View>
+              </Modal>
             </View>
 
             <Pressable

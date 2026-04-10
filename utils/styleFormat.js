@@ -536,5 +536,26 @@ export const getStyles = (theme) => {
       width: "100%",
       paddingHorizontal: 16,
     },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContent: {
+      width: "80%",
+      backgroundColor: isLight ? "#fff" : "#333",
+      padding: 24,
+      borderRadius: 16,
+      gap: 16,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: isLight ? "#ddd" : "#555",
+      padding: 12,
+      paddingVertical: 16,
+      borderRadius: 8,
+      color: isLight ? "#000" : "#fff",
+    },
   });
 };

@@ -8,6 +8,7 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  deleteUser,
 } from "firebase/auth";
 import {
   doc,
@@ -16,6 +17,8 @@ import {
   serverTimestamp,
   deleteDoc,
   updateDoc,
+  runTransaction,
+  arrayUnion,
 } from "firebase/firestore";
 import { savePassword, getPassword } from "./secureStorage";
 
@@ -41,6 +44,7 @@ export const checkSignUp = async (email, password, extraData) => {
       createdAt: serverTimestamp(),
       email: extraData.email,
       appointments: [],
+      coupon: [],
     });
 
     return user;
@@ -140,21 +144,32 @@ export const logout = async () => {
   }
 };
 
-export const checkDeleteAccount = async () => {
+export const checkDeleteAccount = async (password) => {
   const user = auth.currentUser;
   if (!user) throw new Error("no-user");
 
   try {
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+    console.log("重新驗證成功");
+
     const userDocRef = doc(db, "users", user.uid);
     await deleteDoc(userDocRef);
     console.log("Firestore 資料已刪除");
 
-    await user.delete();
+    await deleteUser(user);
     console.log("Auth 帳號已刪除");
 
     return true;
   } catch (error) {
     console.error("checkDeleteAccount 發生錯誤:", error.code);
+
+    if (error.code === "auth/wrong-password") {
+      throw new Error("密碼錯誤，請重新輸入");
+    } else if (error.code === "auth/requires-recent-login") {
+      throw new Error("登入逾時，請重新登入後再執行刪除");
+    }
+
     throw error;
   }
 };
@@ -178,6 +193,48 @@ export const changeUserPassword = async (currentPassword, newPassword) => {
 
     return true;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const checkCreateReservation = async (bookingData) => {
+  const { userId, date, time, title, price, userName } = bookingData;
+
+  const slotId = `${date}_${time}_${title}`;
+  const slotRef = doc(db, "bookings", slotId);
+  const userRef = doc(db, "users", userId);
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const slotSnap = await transaction.get(slotRef);
+      if (slotSnap.exists()) {
+        throw new Error("occupied");
+      }
+
+      transaction.set(slotRef, {
+        status: "booked",
+        userId: userId,
+        userName: userName,
+        price: price,
+        createdAt: serverTimestamp(),
+        date: date,
+        time: time,
+        title: title,
+      });
+
+      transaction.update(userRef, {
+        appointments: arrayUnion({
+          bookingId: slotId,
+          date: date,
+          time: time,
+          title: title,
+          bookedAt: new Date().toISOString(),
+        }),
+      });
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("預約 Transaction 失敗:", error);
     throw error;
   }
 };

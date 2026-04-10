@@ -414,6 +414,7 @@ export default function SignUp() {
                       value={date}
                       mode="date"
                       display="spinner"
+                      maximumDate={new Date()}
                       onChange={onDateChange}
                       textColor={isLight ? "#000" : "#fff"}
                     />
