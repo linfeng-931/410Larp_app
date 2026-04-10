@@ -36,7 +36,7 @@ export default function SettingCard({ contents, colorScheme, link, type }) {
                 opacity: pressed ? 0.5 : 1,
               })}
               onPress={() => {
-                if (isGuest) {
+                if (isGuest && type != 2) {
                   Alert.alert("請先註冊或登入");
                   router.push("/subPage/LogIn");
                   return;

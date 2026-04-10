@@ -296,7 +296,7 @@ export default function Setting() {
                 contents={basicSetting}
                 colorScheme={colorScheme}
                 link={accountDetailLink}
-                type={0}
+                type={2}
               />
             </View>
             <View
@@ -312,7 +312,7 @@ export default function Setting() {
                 contents={help}
                 colorScheme={colorScheme}
                 link={accountDetailLink}
-                type={0}
+                type={2}
               />
             </View>
             <View

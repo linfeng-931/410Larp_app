@@ -1,11 +1,10 @@
 import { useColorScheme, Pressable, Text } from "react-native";
 import { getStyles } from "../utils/styleFormat";
 import { router } from "expo-router";
+import { useAppStyles } from "../utils/useAppStyles";
 
 export default function HomeBtn({ path, name }) {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  const isLight = colorScheme === "light";
+  const { colorScheme, styles, isLight } = useAppStyles();
   return (
     <Pressable
       onPress={() => router.push(path)}
