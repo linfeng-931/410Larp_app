@@ -68,7 +68,6 @@ export const checkPersonalDetailUpdate = async (extraData) => {
       birthday: extraData.birthday,
       photoURL: extraData.profilePhoto || "",
       createdAt: serverTimestamp(),
-      appointments: [],
     });
 
     return user;
@@ -85,8 +84,7 @@ export const checkContactUpdate = async (extraData) => {
 
     await updateDoc(userRef, {
       phone: extraData,
-      createdAt: serverTimestamp(),
-      appointments: [],
+      updatedAt: serverTimestamp(),
     });
 
     return user;
@@ -198,9 +196,29 @@ export const changeUserPassword = async (currentPassword, newPassword) => {
 };
 
 export const checkCreateReservation = async (bookingData) => {
-  const { userId, date, time, title, price, userName } = bookingData;
+  const {
+    userId,
+    date,
+    time,
+    title,
+    originPrice,
+    totalPrice,
+    userName,
+    duration,
+    hostName,
+    otherRequire,
+    people,
+    address,
+  } = bookingData;
 
-  const slotId = `${date}_${time}_${title}`;
+  const [h, m] = time.split(":").map(Number);
+  const startTimeValue = h + m / 60;
+  const endTimeValue = startTimeValue + duration;
+
+  const safeDate = date.replace(/\//g, "-");
+  const safeTitle = title.replace(/\//g, "-");
+  const slotId = `${safeDate}_${time}_${safeTitle}`;
+
   const slotRef = doc(db, "bookings", slotId);
   const userRef = doc(db, "users", userId);
 
@@ -215,11 +233,18 @@ export const checkCreateReservation = async (bookingData) => {
         status: "booked",
         userId: userId,
         userName: userName,
-        price: price,
+        originPrice: originPrice,
+        totalPrice: totalPrice,
         createdAt: serverTimestamp(),
         date: date,
         time: time,
         title: title,
+        people: people,
+        address: address,
+        hostName: hostName,
+        otherRequire: otherRequire,
+        startTimeValue,
+        endTimeValue,
       });
 
       transaction.update(userRef, {
@@ -228,6 +253,10 @@ export const checkCreateReservation = async (bookingData) => {
           date: date,
           time: time,
           title: title,
+          people: people,
+          address: address,
+          startTimeValue,
+          endTimeValue,
           bookedAt: new Date().toISOString(),
         }),
       });

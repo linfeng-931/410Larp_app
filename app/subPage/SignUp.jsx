@@ -297,9 +297,9 @@ export default function SignUp() {
                           ? "rgba(0, 0, 0, 0.4)"
                           : "rgba(255, 255, 255, 0.4)"
                       }
-                      value={formData.lastName}
+                      value={formData.firstName}
                       onChangeText={(t) => {
-                        setFormData({ ...formData, lastName: t });
+                        setFormData({ ...formData, firstName: t });
                         if (errors.name) {
                           setErrors((prev) => {
                             const { name, ...rest } = prev;
@@ -319,9 +319,9 @@ export default function SignUp() {
                           ? "rgba(0, 0, 0, 0.4)"
                           : "rgba(255, 255, 255, 0.4)"
                       }
-                      value={formData.firstName}
+                      value={formData.lastName}
                       onChangeText={(t) => {
-                        setFormData({ ...formData, firstName: t });
+                        setFormData({ ...formData, lastName: t });
                         if (errors.name) {
                           setErrors((prev) => {
                             const { name, ...rest } = prev;
@@ -595,6 +595,7 @@ export default function SignUp() {
                 </Pressable>
               </Text>
             </Pressable>
+            <ErrorTip msg={errors.terms} />
             {/* Sign Up */}
             <Pressable
               onPress={handleSignUp}

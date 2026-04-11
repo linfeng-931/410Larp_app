@@ -331,6 +331,32 @@ export const getStyles = (theme) => {
       color: isLight ? "#000" : "#fff",
     },
 
+    multiLineFrame: {
+      backgroundColor: `${primaryColor}26`,
+      width: "100%",
+      maxWidth: 338,
+      paddingHorizontal: 16,
+      flexDirection: "row",
+      gap: 24,
+      alignItems: "center",
+      borderRadius: 8,
+      color: isLight ? "#000" : "#fff",
+      padding: 0,
+      overflow: "hidden",
+    },
+
+    couponFrame: {
+      backgroundColor: `${primaryColor}26`,
+      paddingHorizontal: 16,
+      flexDirection: "row",
+      gap: 24,
+      height: 60,
+      alignItems: "center",
+      borderRadius: 8,
+      color: isLight ? "#000" : "#fff",
+      flex: 2,
+    },
+
     //SearchFrame
     searchFrame: {
       backgroundColor: `${primaryColor}26`,
@@ -556,6 +582,42 @@ export const getStyles = (theme) => {
       paddingVertical: 16,
       borderRadius: 8,
       color: isLight ? "#000" : "#fff",
+    },
+
+    // Table Row
+    row: {
+      flexDirection: "row",
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)",
+      alignItems: "center",
+    },
+    headerBorder: {
+      borderBottomWidth: 1.5,
+      borderBottomColor: isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)",
+    },
+    totalRow: {
+      borderBottomWidth: 0,
+      marginTop: 8,
+    },
+    cell: {
+      color: isLight ? "#000" : "#fff",
+      fontSize: 16,
+    },
+
+    // 欄位比例分配
+    contentCell: { flex: 3 },
+    priceCell: { flex: 2, textAlign: "center" },
+    countCell: { flex: 1, textAlign: "center" },
+    totalCell: { flex: 2, textAlign: "right" },
+
+    headerText: {
+      color: isLight ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)",
+      fontWeight: "600",
+    },
+    totalText: {
+      fontSize: 18,
+      fontWeight: "900",
     },
   });
 };

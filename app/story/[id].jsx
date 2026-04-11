@@ -99,19 +99,36 @@ export default function AnItem() {
             colorScheme={colorScheme}
             font={"立即預約"}
             func={() => {
-              if (isGuest) {
-                Alert.alert("請先註冊或登入");
-                router.push("/subPage/LogIn");
+              if (!story) {
+                console.error("Story data is missing!");
                 return;
               }
-              router.push({
-                pathname: `/subPage/Reservation`,
-                params: {
-                  title: story.title,
-                  people: story.people,
-                  price: story.price,
-                },
-              });
+
+              if (isGuest) {
+                Alert.alert("提示", "請先註冊或登入", [
+                  {
+                    text: "確定",
+                    onPress: () => router.push("/subPage/LogIn"),
+                  },
+                ]);
+                return;
+              }
+
+              try {
+                router.push({
+                  pathname: "/subPage/Reservation",
+                  params: {
+                    title: story.title || "未知劇本",
+                    hour: story.time || "4",
+                    people: Array.isArray(story.people)
+                      ? story.people.join("-")
+                      : story.people,
+                    price: story.price?.toString() || "0",
+                  },
+                });
+              } catch (e) {
+                console.error("跳轉發生錯誤:", e);
+              }
             }}
             btnType={1}
           />

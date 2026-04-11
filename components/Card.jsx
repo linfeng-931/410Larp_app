@@ -15,12 +15,7 @@ export default function Card({ story, colorScheme, horizontal }) {
         opacity: pressed ? 0.5 : 1,
       })}
       onPress={() => {
-        router.push({
-          pathname: `/story/${story.id}`,
-          params: {
-            id: story.id,
-          },
-        });
+        router.push(`/story/${story.id}`);
       }}
     >
       <View
