@@ -2,11 +2,12 @@ import { View, Pressable, Text, Image, Dimensions, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { getStyles } from "../utils/styleFormat";
 import { UsersRound, Shirt, SquareStar } from "lucide-react-native";
+import { useAppStyles } from "../utils/useAppStyles";
 import Rank from "./Rank";
 
 export default function Card({ story, colorScheme, horizontal }) {
   const router = useRouter();
-  const styles = getStyles(colorScheme);
+  const { styles, isLight } = useAppStyles();
   const { width } = Dimensions.get("window");
 
   return (
