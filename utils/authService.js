@@ -19,6 +19,7 @@ import {
   updateDoc,
   runTransaction,
   arrayUnion,
+  onSnapshot,
 } from "firebase/firestore";
 import { savePassword, getPassword } from "./secureStorage";
 
@@ -30,6 +31,15 @@ export const checkSignUp = async (email, password, extraData) => {
       password,
     );
     const user = userCredential.user;
+
+    // useEffect(() => {
+    //   const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
+    //     const data = doc.data();
+    //     setEvents(data.appointments);
+    //   });
+
+    //   return () => unsubscribe();
+    // }, [user.uid]);
 
     await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
@@ -263,7 +273,33 @@ export const checkCreateReservation = async (bookingData) => {
     });
     return { success: true };
   } catch (error) {
-    console.error("預約 Transaction 失敗:", error);
+    // console.error("預約 Transaction 失敗:", error);
     throw error;
   }
+};
+
+export const subscribeUserData = (callback) => {
+  const user = auth.currentUser;
+  if (!user) return null;
+
+  const docRef = doc(db, "users", user.uid);
+
+  const unsubscribe = onSnapshot(
+    docRef,
+    (docSnap) => {
+      if (docSnap.exists()) {
+        callback(docSnap.data());
+      }
+    },
+    (error) => {
+      // 當登出時，這裡會被觸發
+      if (error.code === "permission-denied") {
+        console.log("監聽權限已移除 (用戶已登出)");
+      } else {
+        console.error("監聽失敗:", error);
+      }
+    },
+  );
+
+  return unsubscribe;
 };

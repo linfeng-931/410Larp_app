@@ -13,12 +13,23 @@ import { useFonts } from "expo-font";
 import { useState, useRef, useEffect } from "react";
 import { Undo2 } from "lucide-react-native";
 import { useAppStyles } from "../utils/useAppStyles";
+import { subscribeUserData } from "../utils/authService";
 
 const { width } = Dimensions.get("window");
 
 export default function Weekly() {
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const { styles, isLight } = useAppStyles();
+
+  useEffect(() => {
+    const unsubscribe = subscribeUserData((updatedData) => {
+      setUser(updatedData);
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   // 初始化時間
   const now = new Date();
@@ -26,7 +37,6 @@ export default function Weekly() {
 
   const [baseDate, setBaseDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(todayDate);
-  const translateX = useRef(new Animated.Value(0)).current;
 
   const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -36,7 +46,7 @@ export default function Weekly() {
     return Array.from({ length: 7 }).map((_, i) => {
       const d = addDays(start, i);
       return {
-        fullDate: d.toISOString().slice(0, 10),
+        fullDate: `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")}`,
         dateNum: d.getDate(),
         dayName: dayNames[d.getDay()],
       };
@@ -63,9 +73,12 @@ export default function Weekly() {
   const handleSelect = (fullDate, index) => {
     setSelectedDate(fullDate);
     const itemWidth = (width - 40) / 7;
+
     Animated.spring(translateX, {
       toValue: index * itemWidth,
       useNativeDriver: true,
+      tension: 50,
+      friction: 7,
     }).start();
   };
 
@@ -75,6 +88,13 @@ export default function Weekly() {
     const todayIndex = new Date().getDay();
     handleSelect(todayDate, todayIndex);
   };
+
+  const todayIndex = pages[1].findIndex(
+    (d) => d.fullDate === todayDate.replace(/-/g, "/"),
+  );
+  const itemWidth = (width - 40) / 7;
+  const initialPosition = todayIndex !== -1 ? todayIndex * itemWidth : 0;
+  const translateX = useRef(new Animated.Value(initialPosition)).current;
 
   /* 文字載入 */
   let [fontsLoaded] = useFonts({
@@ -166,7 +186,7 @@ export default function Weekly() {
                       >
                         {item.dayName}
                       </Text>
-                      {hasApp && <View style={styles.dot} />}
+                      <View style={[styles.dot, { opacity: hasApp ? 1 : 0 }]} />
                     </View>
                   </Pressable>
                 );

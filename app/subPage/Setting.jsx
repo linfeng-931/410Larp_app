@@ -55,8 +55,8 @@ export default function Setting() {
             text: "登出",
             style: "destructive",
             onPress: async () => {
-              await logout();
               setUser(null);
+              await logout();
               router.replace("subPage/LogIn");
             },
           },

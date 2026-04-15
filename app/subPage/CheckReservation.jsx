@@ -80,7 +80,14 @@ export default function CheckReservation() {
       ]);
     } catch (error) {
       if (error.message === "occupied") {
-        Alert.alert("預約失敗", "很抱歉，該時段剛被其他用戶預約了。");
+        Alert.alert("預約失敗", "很抱歉，該時段剛被其他用戶預約了。", [
+          {
+            text: "確認",
+            onPress: () => {
+              router.back();
+            },
+          },
+        ]);
       } else {
         Alert.alert("錯誤", "系統忙碌中，請稍後再試");
       }

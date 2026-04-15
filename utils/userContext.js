@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { subscribeToAuthChanges, fetchUserData } from "./authService";
+import { onSnapshot, doc } from "firebase/firestore";
 
 const UserContext = createContext();
 

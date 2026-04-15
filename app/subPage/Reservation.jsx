@@ -13,7 +13,13 @@ import {
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+} from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
@@ -26,16 +32,26 @@ import {
 import LottieView from "lottie-react-native";
 import { useAppStyles } from "../../utils/useAppStyles";
 import { useUser } from "../../utils/userContext";
-import { checkCreateReservation } from "../../utils/authService";
 import Footer from "../../components/Footer";
 import ReserveTimeBtn from "../../components/ReserveTimeBtn";
+import { subscribeUserData } from "../../utils/authService";
 
 export default function Reservation() {
   const { styles, isLight } = useAppStyles();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const { title, people, price, hour } = useLocalSearchParams();
 
   const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const unsubscribe = subscribeUserData((updatedData) => {
+      setUser(updatedData);
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   // 動畫
   const animationRef = useRef(null);
@@ -81,27 +97,21 @@ export default function Reservation() {
 
   // 衝堂計算
   useEffect(() => {
-    const fetchOccupiedSlots = async () => {
-      if (!user) {
-        setAvailableSlots([]);
-        setIsLoading(false);
-        return;
-      }
+    if (!user || !title) return;
 
-      setIsLoading(true);
-      const dateStr = formatDate(date);
+    setIsLoading(true);
+    const dateStr = formatDate(date);
 
-      try {
-        // 抓取當天該劇本已被預約的時段
-        const q = query(
-          collection(db, "bookings"),
-          where("date", "==", dateStr),
-          where("title", "==", title),
-        );
-        const querySnapshot = await getDocs(q);
+    const q = query(
+      collection(db, "bookings"),
+      where("date", "==", dateStr),
+      where("title", "==", title),
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
         const occupiedTimes = querySnapshot.docs.map((doc) => doc.data().time);
-
-        // 生成所有可能的時段
         const slots = [];
         let current = 9.0;
         const closing = 22.0;
@@ -110,19 +120,14 @@ export default function Reservation() {
           const h = Math.floor(current);
           const m = (current % 1) * 60;
           const timeLabel = `${h}:${m === 0 ? "00" : m}`;
-
           const startV = current;
           const endV = current + durationNum;
 
-          // 檢查此時段是否被訂走跟用戶現有預約衝堂
           const isBooked = occupiedTimes.includes(timeLabel);
+
           const isConflict = user.appointments?.some((app) => {
             if (app.date !== dateStr) return false;
-
-            const appStart = app.startTimeValue;
-            const appEnd = app.endTimeValue;
-
-            return startV < appEnd && appStart < endV;
+            return startV < app.endTimeValue && app.startTimeValue < endV;
           });
 
           slots.push({
@@ -131,19 +136,23 @@ export default function Reservation() {
             endTimeValue: endV,
             disabled: isBooked || isConflict,
           });
-
           current += durationNum + 0.5;
         }
-        setAvailableSlots(slots);
-      } catch (error) {
-        console.error("讀取預約資料失敗:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    fetchOccupiedSlots();
-  }, [date, title, user]);
+        setAvailableSlots(slots);
+        setIsLoading(false);
+        setTimeSelect("");
+      },
+      (error) => {
+        console.error("監聽預約失敗:", error);
+        setIsLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [date, title, user, durationNum]);
+
+  [date, title, user];
 
   // 錯誤訊息
   const validate = () => {

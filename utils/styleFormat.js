@@ -609,7 +609,7 @@ export const getStyles = (theme) => {
     contentCell: { flex: 3 },
     priceCell: { flex: 2, textAlign: "center" },
     countCell: { flex: 1, textAlign: "center" },
-    totalCell: { flex: 2, textAlign: "right" },
+    totalCell: { flex: 4, textAlign: "right" },
 
     headerText: {
       color: isLight ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)",

@@ -6,7 +6,6 @@ import Weekly from "../../components/Weekly";
 import HomeBtn from "../../components/HomeBtn";
 import Payment from "../../components/Payment";
 import Footer from "../../components/Footer";
-
 import { useUser } from "../../utils/userContext";
 import { useAppStyles } from "../../utils/useAppStyles";
 
@@ -65,6 +64,7 @@ export default function Home() {
             {/* Weekly */}
             <Weekly />
             {/* Appoint */}
+
             {/* Payment */}
             <Payment />
             {/* Other */}
