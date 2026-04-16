@@ -1,7 +1,7 @@
 import { View, Pressable, Text, Image, Dimensions, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { getStyles } from "../utils/styleFormat";
-import { Clock4, MapPin } from "lucide-react-native";
+import { Clock4, MapPin, Calendar } from "lucide-react-native";
 import { useAppStyles } from "../utils/useAppStyles";
 import Rank from "./Rank";
 import { stories } from "../utils/story";
@@ -10,7 +10,7 @@ export default function Homecard({ story, colorScheme, horizontal }) {
   const { styles, isLight } = useAppStyles();
   const { width } = Dimensions.get("window");
 
-  console.log(story.title);
+  //console.log(story.title);
   const cover = stories.filter((s) => {
     if (s.title === story.title) return s.cover;
   })[0].cover;
@@ -47,7 +47,10 @@ export default function Homecard({ story, colorScheme, horizontal }) {
           />
           <View style={styles.cardContentContainerHorizantal}>
             <Text style={styles.title}>{story.title}</Text>
-
+            <View style={styles.cardContent}>
+              <Calendar color="#FFA000" size={16} strokeWidth={2.5} />
+              <Text style={styles.content2}>{story.date}</Text>
+            </View>
             <View style={styles.cardContent}>
               <Clock4 color="#FFA000" size={16} strokeWidth={2.5} />
               <Text style={styles.content2}>

@@ -44,6 +44,8 @@ export default function Setting() {
   const [password, setPassword] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const [ondelete, setOndelete] = useState(false);
+
   const { user, setUser, isGuest } = useUser();
   const handleLogout = async () => {
     if (isGuest) {
@@ -85,15 +87,21 @@ export default function Setting() {
 
     try {
       await checkDeleteAccount(password);
-
+      setOndelete(false);
       setIsModalVisible(false);
       setUser(null);
       Alert.alert("已刪除", "帳號已成功移除", [
-        { text: "確定", onPress: () => router.replace("/subPage/LogIn") },
+        {
+          text: "確定",
+          onPress: () => {
+            setOndelete(false);
+            router.replace("/subPage/LogIn");
+          },
+        },
       ]);
     } catch (error) {
       Alert.alert("驗證失敗", "密碼錯誤，請重新嘗試");
-      console.log(error.code);
+      setOndelete(false);
     }
   };
 
@@ -384,7 +392,10 @@ export default function Setting() {
                         </Text>
                       </Pressable>
                       <Pressable
-                        onPress={confirmDelete}
+                        onPress={() => {
+                          setOndelete(true);
+                          confirmDelete();
+                        }}
                         style={{
                           flex: 1,
 
@@ -393,6 +404,7 @@ export default function Setting() {
                             ? "rgba(0,0,0,0.5)"
                             : "rgba(255,255,255,0.5)",
                         }}
+                        disabled={ondelete}
                       >
                         <Text
                           style={[

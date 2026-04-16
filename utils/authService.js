@@ -14,14 +14,20 @@ import {
   doc,
   setDoc,
   getDoc,
+  getDocs,
   serverTimestamp,
   deleteDoc,
   updateDoc,
   runTransaction,
   arrayUnion,
   onSnapshot,
+  collection,
+  query,
+  where,
+  writeBatch,
 } from "firebase/firestore";
 import { savePassword, getPassword } from "./secureStorage";
+import { use } from "react";
 
 export const checkSignUp = async (email, password, extraData) => {
   try {
@@ -161,13 +167,18 @@ export const checkDeleteAccount = async (password) => {
     await reauthenticateWithCredential(user, credential);
     console.log("重新驗證成功");
 
+    // 刪除 bookings 對應資料
+    console.log(user.uid);
+    await deleteUserAndBookings(user.uid);
+
+    // 刪除使用者 Firestore 資料
     const userDocRef = doc(db, "users", user.uid);
     await deleteDoc(userDocRef);
     console.log("Firestore 資料已刪除");
 
+    // 刪除使用者
     await deleteUser(user);
     console.log("Auth 帳號已刪除");
-
     return true;
   } catch (error) {
     console.error("checkDeleteAccount 發生錯誤:", error.code);
@@ -180,6 +191,22 @@ export const checkDeleteAccount = async (password) => {
 
     throw error;
   }
+};
+
+const deleteUserAndBookings = async (userId) => {
+  const batch = writeBatch(db);
+  if (!userId) throw new Error("userId-is-required");
+
+  const bookingsRef = collection(db, "bookings");
+  const q = query(bookingsRef, where("userId", "==", userId));
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((document) => {
+    batch.delete(document.ref);
+  });
+
+  await batch.commit();
+  console.log("相關預約已成功刪除");
 };
 
 export const changeUserPassword = async (currentPassword, newPassword) => {

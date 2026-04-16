@@ -60,9 +60,6 @@ export default function Footer({ page }) {
           style={({ pressed }) => ({
             opacity: pressed ? 0.5 : 1,
           })}
-          onPress={() => {
-            router.push("/subPage/myBook");
-          }}
         >
           <MessageCircleMore size={24} style={styles.iconBtnDisact} />
         </Pressable>

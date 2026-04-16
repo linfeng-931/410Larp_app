@@ -369,7 +369,7 @@ export const getStyles = (theme) => {
     searchFrame: {
       backgroundColor: `${primaryColor}26`,
       width: "100%",
-      padding: 16,
+      paddingHorizontal: 16,
       flexDirection: "row",
       flexWrap: "wrap",
       gap: 24,
