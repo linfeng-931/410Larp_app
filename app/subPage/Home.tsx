@@ -26,7 +26,7 @@ export default function Home() {
         <Stack.Screen />
 
         <ScrollView style={{ padding: 20 }}>
-          <View style={{ gap: 24 }}>
+          <View style={{ gap: 24 ,marginBottom: 32}}>
             {/* Header */}
             <View
               style={{
