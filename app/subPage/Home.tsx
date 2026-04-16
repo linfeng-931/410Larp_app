@@ -63,8 +63,6 @@ export default function Home() {
             </View>
             {/* Weekly */}
             <Weekly />
-            {/* Appoint */}
-
             {/* Payment */}
             <Payment />
             {/* Other */}
@@ -82,6 +80,7 @@ export default function Home() {
             </View>
           </View>
         </ScrollView>
+        <View style={{ height: 120 }} />
       </SafeAreaView>
       <Footer page={1} />
     </>

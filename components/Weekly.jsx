@@ -14,6 +14,7 @@ import { useState, useRef, useEffect } from "react";
 import { Undo2 } from "lucide-react-native";
 import { useAppStyles } from "../utils/useAppStyles";
 import { subscribeUserData } from "../utils/authService";
+import AppointmentList from "../components/AppointmentList";
 
 const { width } = Dimensions.get("window");
 
@@ -33,8 +34,7 @@ export default function Weekly() {
 
   // 初始化時間
   const now = new Date();
-  const todayDate = now.toISOString().slice(0, 10);
-
+  const todayDate = `${now.getFullYear()}/${(now.getMonth() + 1).toString().padStart(2, "0")}/${now.getDate().toString().padStart(2, "0")}`;
   const [baseDate, setBaseDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(todayDate);
 
@@ -89,9 +89,8 @@ export default function Weekly() {
     handleSelect(todayDate, todayIndex);
   };
 
-  const todayIndex = pages[1].findIndex(
-    (d) => d.fullDate === todayDate.replace(/-/g, "/"),
-  );
+  const todayIndex = new Date().getDay();
+
   const itemWidth = (width - 40) / 7;
   const initialPosition = todayIndex !== -1 ? todayIndex * itemWidth : 0;
   const translateX = useRef(new Animated.Value(initialPosition)).current;
@@ -195,6 +194,9 @@ export default function Weekly() {
           ))}
         </PagerView>
       </View>
+
+      {/* Appoint */}
+      <AppointmentList todayDate={todayDate} selectedDate={selectedDate} />
     </View>
   );
 }

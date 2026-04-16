@@ -201,6 +201,14 @@ export const getStyles = (theme) => {
       minHeight: 216,
       width: 320,
     },
+    homeCardHorizantal: {
+      flexDirection: "row",
+      backgroundColor: isLight ? oppositeColor : `${primaryColor}26`,
+      borderRadius: 16,
+      overflow: "hidden",
+      minHeight: 216,
+      width: width - 40,
+    },
     cardContentContainer: {
       top: "50%",
       paddingBottom: 32,
