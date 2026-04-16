@@ -49,10 +49,6 @@ export default function Footer({ page }) {
         </Pressable>
       )}
 
-      <View style={styles.roundedBtn}>
-        <Plus size={24} style={styles.iconOfRoundedBtn} />
-      </View>
-
       {page == 3 ? (
         <MessageCircleMore size={24} style={styles.iconBtn} />
       ) : (
