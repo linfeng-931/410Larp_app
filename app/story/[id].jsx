@@ -94,7 +94,7 @@ export default function AnItem() {
       </View>
       <View style={styles.priceContainer}>
         <Text style={styles.title}>NT$ {story.price} /人</Text>
-        <View style={{ width: "70%" }}>
+        <View style={{ width: "70%", gap: 8 }}>
           <Btn
             colorScheme={colorScheme}
             font={"立即預約"}
@@ -131,6 +131,45 @@ export default function AnItem() {
               }
             }}
             btnType={1}
+          />
+          <Btn
+            colorScheme={colorScheme}
+            font={"揪團"}
+            func={() => {
+              if (!story) {
+                console.error("Story data is missing!");
+                return;
+              }
+
+              if (isGuest) {
+                Alert.alert("提示", "請先註冊或登入", [
+                  {
+                    text: "確定",
+                    onPress: () => router.push("/subPage/LogIn"),
+                  },
+                ]);
+                return;
+              }
+
+              try {
+                router.push({
+                  pathname: "/subPage/Organize",
+                  params: {
+                    id: story.id,
+                    cover: story.cover,
+                    title: story.title || "未知劇本",
+                    hour: story.time || "4",
+                    people: Array.isArray(story.people)
+                      ? story.people.join("-")
+                      : story.people,
+                    price: story.price?.toString() || "0",
+                  },
+                });
+              } catch (e) {
+                console.error("跳轉發生錯誤:", e);
+              }
+            }}
+            btnType={0}
           />
         </View>
       </View>

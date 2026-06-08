@@ -2,6 +2,7 @@
   "expo": {
     "name": "410Larp",
     "slug": "410Larp",
+    "platforms": ["ios", "android"],
     "icon": "assets/images/logo_cover.png",
     "version": "1.0.0",
     "scheme": "acme",
