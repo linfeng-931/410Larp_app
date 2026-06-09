@@ -382,6 +382,21 @@ export const getStyles = (theme) => {
       borderWidth: 0,
     },
 
+    searchFrame1: {
+      // backgroundColor: `${primaryColor}26`,
+      paddingHorizontal: 16,
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 24,
+      height: 60,
+      alignItems: "center",
+      borderRadius: 8,
+      flex: 1,
+      width: 200,
+      borderBottomWidth: 1,
+      borderBlockEndColor: `${primaryColor}26`,
+    },
+
     //SelectFrame
     selectFrame: {
       backgroundColor: `${primaryColor}26`,

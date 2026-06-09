@@ -16,7 +16,7 @@ export default function Home() {
 
   const { user, loading } = useUser();
   const data = [
-    { btnName: "查找野團", route: "/subPage/Home", id: "1" },
+    { btnName: "查找野團", route: "/subPage/OrganizeHome", id: "1" },
     { btnName: "你的揪團", route: "/subPage/Home", id: "2" },
   ];
 
@@ -26,7 +26,7 @@ export default function Home() {
         <Stack.Screen />
 
         <ScrollView style={{ padding: 20 }}>
-          <View style={{ gap: 24 ,marginBottom: 32}}>
+          <View style={{ gap: 24, marginBottom: 32 }}>
             {/* Header */}
             <View
               style={{
