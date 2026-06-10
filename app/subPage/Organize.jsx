@@ -7,24 +7,15 @@ import {
   Platform,
   KeyboardAvoidingView,
   Keyboard,
-  Image,
-  ActivityIndicator,
   Alert,
 } from "react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  onSnapshot,
-} from "firebase/firestore";
-import { auth, db } from "../../firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../../firebase";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
-  ErrorTip,
   Square,
   SquareCheck,
   CircleAlert,
@@ -34,7 +25,7 @@ import LottieView from "lottie-react-native";
 import { useAppStyles } from "../../utils/useAppStyles";
 import { useUser } from "../../utils/userContext";
 import Footer from "../../components/Footer";
-import { subscribeUserData } from "../../utils/authService";
+import { subscribeUserData, createGroupEvent } from "../../utils/authService"; // 確保引入 createGroupEvent
 import { Calendar, CalendarList } from "react-native-calendars";
 import SelectFunc from "../../components/SelectFun";
 import Card from "../../components/Card";
@@ -44,7 +35,7 @@ export default function Organize() {
   const { styles, isLight, colorScheme } = useAppStyles();
   const { user, setUser } = useUser();
   const paramsData = useLocalSearchParams() || {};
-  const { id, cover, title, people, price, hour } = paramsData;
+  const { id } = paramsData;
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -65,37 +56,26 @@ export default function Organize() {
   const [selectedStoryId, setSelectedStoryId] = useState(id || "");
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [timeSelect, setTimeSelect] = useState("");
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectVerify, setSelectVerify] = useState(true);
 
-  // 輸入
   const [formData, setFormData] = useState({
-    selectVerify: selectVerify,
-    hostName: "",
     otherRequire: "",
     agreeTerms: false,
-    address: "臺北市中山區長安東路一段24-2號3樓",
   });
 
-  // 取得最長遊玩時長
+  // 人數
   const [storyPeople, SetStoryPeople] = useState("");
-  const durationNum = useMemo(() => {
-    const match = hour?.match(/(?<=-)\d+/) || hour?.match(/\d+/);
-    return match ? parseFloat(match[0]) : 4;
-  }, [hour]);
-
-  //player list
   const selectedStory = useMemo(() => {
     return stories.find((s) => s.id === selectedStoryId) || null;
   }, [selectedStoryId]);
 
-  const storyOptions = useMemo(() => {
-    return stories.map((s) => ({ value: s.id, label: s.title }));
-  }, []);
+  const neededPeople = useMemo(() => {
+    if (!selectedStory || !storyPeople) return 0;
+    const maxPeople = Math.max(...selectedStory.people);
+    return maxPeople - Number(storyPeople);
+  }, [selectedStory, storyPeople]);
 
   const optionsPeople = useMemo(() => {
     if (!selectedStory) return [{ value: 0, label: "請先選擇劇本" }];
@@ -108,15 +88,10 @@ export default function Organize() {
     return dynamicOptions;
   }, [selectedStory]);
 
-  const neededPeople = useMemo(() => {
-    if (!selectedStory || !storyPeople) return 0;
-    const maxPeople = Math.max(...selectedStory.people);
-    return maxPeople - Number(storyPeople);
-  }, [selectedStory, storyPeople]);
-
-  /*const formatDate = (d) => {
-      return `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")}`;
-    };*/
+  // 劇本
+  const storyOptions = useMemo(() => {
+    return stories.map((s) => ({ value: s.id, label: s.title }));
+  }, []);
 
   // 日期選擇限制
   const mainColor = "#FFA000";
@@ -124,13 +99,13 @@ export default function Organize() {
   const threeMonthsLater = new Date();
   threeMonthsLater.setMonth(today.getMonth() + 3);
 
-  //格式化成'YYYY-MM-DD'
+  // 格式化成'YYYY-MM-DD'
   const formatDate = (date) => date.toISOString().split("T")[0];
 
   const minDateStr = formatDate(today);
   const maxDateStr = formatDate(threeMonthsLater);
 
-  //arrow判斷
+  // arrow 判斷
   const [isRightArrowDisabled, setIsRightArrowDisabled] = useState(false);
   const [isLeftArrowDisabled, setIsLeftArrowDisabled] = useState(false);
   const handleMonthChange = (month) => {
@@ -161,7 +136,7 @@ export default function Organize() {
     }
   };
 
-  //startDate and endDate
+  // startDate and endDate
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [markedDates, setMarkedDates] = useState({});
@@ -174,7 +149,7 @@ export default function Organize() {
     while (start <= end) {
       const dateString = formatDate(start);
 
-      //style
+      // style
       if (dateString === startStr) {
         dates[dateString] = {
           startingDay: true,
@@ -195,11 +170,11 @@ export default function Organize() {
     return dates;
   };
 
-  //日期點擊
+  // 日期點擊
   const handleDayPress = (day) => {
     const dateString = day.dateString;
 
-    //尚未選取開始日期
+    // 尚未選取開始日期
     if (!startDate || (startDate && endDate)) {
       setStartDate(dateString);
       setEndDate(null);
@@ -213,7 +188,7 @@ export default function Organize() {
         },
       });
     }
-    //選取結束日期
+    // 選取結束日期
     else if (startDate && !endDate) {
       if (new Date(dateString) < new Date(startDate)) {
         setStartDate(dateString);
@@ -241,72 +216,15 @@ export default function Organize() {
     setDate(currentDate);
   };
 
-  // 衝堂計算
-  useEffect(() => {
-    if (!user || !title) return;
-
-    setIsLoading(true);
-    const dateStr = formatDate(date);
-
-    const q = query(
-      collection(db, "bookings"),
-      where("date", "==", dateStr),
-      where("title", "==", title),
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const occupiedTimes = querySnapshot.docs.map((doc) => doc.data().time);
-        const slots = [];
-        let current = 9.0;
-        const closing = 22.0;
-
-        while (current + durationNum <= closing) {
-          const h = Math.floor(current);
-          const m = (current % 1) * 60;
-          const timeLabel = `${h}:${m === 0 ? "00" : m}`;
-          const startV = current;
-          const endV = current + durationNum;
-
-          const isBooked = occupiedTimes.includes(timeLabel);
-
-          const isConflict = user.appointments?.some((app) => {
-            if (app.date !== dateStr) return false;
-            return startV < app.endTimeValue && app.startTimeValue < endV;
-          });
-
-          slots.push({
-            time: timeLabel,
-            startTimeValue: startV,
-            endTimeValue: endV,
-            disabled: isBooked || isConflict,
-          });
-          current += durationNum + 0.5;
-        }
-
-        setAvailableSlots(slots);
-        setIsLoading(false);
-        setTimeSelect("");
-      },
-      (error) => {
-        console.error("監聽預約失敗:", error);
-        setIsLoading(false);
-      },
-    );
-
-    return () => unsubscribe();
-  }, [date, title, user, durationNum]);
-
-  [date, title, user];
-
-  // 錯誤訊息
+  // 錯誤訊息驗證
   const validate = () => {
     let newErrors = {};
 
-    if (!formData.agreeTerms) newErrors.terms = "請勾選同意條款";
-    if (!timeSelect) newErrors.timeSelect = "請選擇預約時段";
-    if (!date) newErrors.date = "請選擇預約日期";
+    if (!selectedStoryId) newErrors.story = "請選擇欲揪團的劇本";
+    if (!storyPeople && storyPeople !== 0)
+      newErrors.people = "請選擇當前已有的人數";
+    if (!startDate || !endDate) newErrors.date = "請選擇完整的預計日期區間";
+    if (!formData.agreeTerms) newErrors.terms = "請勾選同意使用條款與申明";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
@@ -323,33 +241,59 @@ export default function Organize() {
       </View>
     ) : null;
 
-  // 處理預約
-  const handleNextStep = () => {
+  // 處理發起揪團
+  const handleOrganizeGroup = async () => {
     if (validate()) {
-      router.push({
-        pathname: "/subPage/CheckReservation",
-        params: {
-          data: JSON.stringify({
-            ...formData,
-            date: formatDate(date),
-            time: timeSelect,
-            title: title,
-            people: people,
-            originPrice: Number(price),
-            totalPrice: formData.selectVerify
-              ? Number(price) * people + 200
-              : Number(price) * people,
-            duration: durationNum,
-          }),
-        },
-      });
+      if (!user) {
+        Alert.alert("提示", "請先登入用戶後再發起揪團");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const groupData = {
+          userId: user.uid,
+          hostPhotoURL: user.photoURL || "",
+          storyId: selectedStoryId,
+          title: selectedStory?.title || "",
+          startDate: startDate,
+          endDate: endDate,
+          currentPeople: Number(storyPeople),
+          neededPeople: neededPeople,
+          selectVerify: selectVerify,
+          otherRequire: formData.otherRequire,
+        };
+
+        await createGroupEvent(groupData);
+        setLoading(false);
+
+        // 成功彈跳視窗，按下確定後回首頁
+        Alert.alert(
+          "發起成功",
+          "您的揪團已成功建立！",
+          [
+            {
+              text: "確定",
+              onPress: () => {
+                router.dismissAll();
+                router.replace("/subPage/Home"); // 返回系統首頁
+              },
+            },
+          ],
+          { cancelable: false },
+        );
+      } catch (error) {
+        setLoading(false);
+        console.error("發起揪團失敗:", error);
+        Alert.alert("錯誤", "系統忙碌中，發起揪團失敗，請稍後再試。");
+      }
     }
   };
 
   return (
     <>
       <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-        <Stack.Screen />
+        <Stack.Screen options={{ headerShown: false }} />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
@@ -383,11 +327,7 @@ export default function Organize() {
                     SetStoryPeople("");
                   }}
                 />
-                {errors.story && (
-                  <Text style={{ color: "red", fontSize: 12 }}>
-                    {errors.story}
-                  </Text>
-                )}
+                <ErrorTip msg={errors.story} />
               </View>
 
               {/* People */}
@@ -401,8 +341,9 @@ export default function Organize() {
                   onValueChange={SetStoryPeople}
                   disabled={!selectedStoryId}
                 />
+                <ErrorTip msg={errors.people} />
               </View>
-              {selectedStory && storyPeople && (
+              {selectedStory && storyPeople !== "" && (
                 <View
                   style={{
                     backgroundColor: "#FFF9F0",
@@ -418,7 +359,6 @@ export default function Organize() {
                       fontSize: 18,
                       fontWeight: "bold",
                       color: mainColor,
-                      marginTop: 4,
                     }}
                   >
                     需求人數：{neededPeople} 人
@@ -515,10 +455,12 @@ export default function Organize() {
                     <Text style={styles.content1}>無條件加入</Text>
                   </Pressable>
                 </View>
+                <ErrorTip msg={errors.verify} />
               </View>
+
+              {/* Note */}
               <View style={{ gap: 8 }}>
                 <Text style={styles.content1}>備註</Text>
-
                 <View style={styles.multiLineFrame}>
                   <TextInput
                     editable
@@ -526,7 +468,6 @@ export default function Organize() {
                     scrollEnabled={false}
                     style={{
                       fontSize: 16,
-                      paddingVertical: 8,
                       color: isLight ? "#000" : "#fff",
                       paddingHorizontal: 8,
                       paddingVertical: 16,
@@ -545,6 +486,7 @@ export default function Organize() {
                   />
                 </View>
               </View>
+
               {/* Policy */}
               <Pressable
                 onPress={() => {
@@ -557,40 +499,33 @@ export default function Organize() {
                 style={{ flexDirection: "row", gap: 16, alignItems: "center" }}
               >
                 {formData.agreeTerms ? (
-                  <SquareCheck fill="#FFA000" size={24} />
+                  <SquareCheck fill="#FFA000" color="#ffffff" size={24} />
                 ) : (
                   <Square color="#666" size={24} />
                 )}
-                <Text
-                  style={[styles.content1, { flexWrap: "wrap", width: "100%" }]}
-                >
+                <Text style={[styles.content1, { flexWrap: "wrap", flex: 1 }]}>
                   我已閱讀並同意天空中娛樂股份有限公司的{" "}
-                  <Pressable>
-                    {({ pressed }) => (
-                      <View style={{ flexDirection: "row", gap: 8 }}>
-                        <Text style={styles.content1}>尚未加入?</Text>
-                        <Text
-                          style={{
-                            color: pressed ? "#e69303" : "#FFA000",
-                            fontSize: 16,
-                            fontWeight: "600",
-                            textDecorationLine: "underline",
-                          }}
-                        >
-                          使用條款與申明
-                        </Text>
-                      </View>
-                    )}
-                  </Pressable>
+                  <Text
+                    style={{
+                      color: "#FFA000",
+                      fontSize: 16,
+                      fontWeight: "600",
+                      textDecorationLine: "underline",
+                    }}
+                  >
+                    使用條款與申明
+                  </Text>
                 </Text>
               </Pressable>
               <ErrorTip msg={errors.terms} />
 
+              {/* 按鈕組 */}
               <View
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
                   gap: 48,
+                  marginTop: 16,
                 }}
               >
                 <Pressable
@@ -603,26 +538,25 @@ export default function Organize() {
                     height: 60,
                     borderWidth: 1.5,
                     borderRadius: 8,
-                    backgroundColor: pressed ? "#FFA000" : null,
-                    borderColor: pressed
-                      ? "#FFA000"
-                      : isLight
-                        ? "rgba(0,0,0,0.4)"
-                        : "rgba(255,255,255,0.4)",
+                    backgroundColor: pressed ? "rgba(0,0,0,0.05)" : null,
+                    borderColor: isLight
+                      ? "rgba(0,0,0,0.4)"
+                      : "rgba(255,255,255,0.4)",
                   })}
                 >
                   <Text
                     style={{
                       fontSize: 16,
                       color: isLight ? "#000" : "#fff",
-                      fontWeight: 900,
+                      fontWeight: "900",
                     }}
                   >
                     取消
                   </Text>
                 </Pressable>
+
                 <Pressable
-                  onPress={handleNextStep}
+                  onPress={handleOrganizeGroup}
                   disabled={loading}
                   style={({ pressed }) => ({
                     justifyContent: "center",
@@ -645,9 +579,9 @@ export default function Organize() {
                     />
                   ) : (
                     <Text
-                      style={{ fontSize: 16, color: "#fff", fontWeight: 900 }}
+                      style={{ fontSize: 16, color: "#fff", fontWeight: "900" }}
                     >
-                      下一步
+                      確認發起
                     </Text>
                   )}
                 </Pressable>
@@ -657,8 +591,7 @@ export default function Organize() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-
-      <Footer page={2} />
+      <Footer page={1} />
     </>
   );
 }

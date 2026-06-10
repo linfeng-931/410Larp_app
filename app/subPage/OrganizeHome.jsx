@@ -2,47 +2,53 @@ import {
   View,
   Text,
   ScrollView,
-  Image,
   Pressable,
   KeyboardAvoidingView,
   Platform,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
-
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Footer from "../../components/Footer";
 import { useUser } from "../../utils/userContext";
 import { useAppStyles } from "../../utils/useAppStyles";
-import { useRef, useEffect, useState, useMemo, use } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import SelectFunc from "../../components/SelectFun";
 import Btn from "../../components/Btn";
 import MultipleSelectFunc from "../../components/MultipleSelectFunc";
 import { Plus, Search, ChevronLeft, ListFilter } from "lucide-react-native";
-import { router } from "expo-router";
+import { fetchGroupsList } from "../../utils/authService";
+import { RecentGroupCard, GroupListCard } from "../../components/OrganizeCard";
+
+const PAGE_SIZE = 10;
 
 export default function OrganizeHome() {
   const { styles, isLight, colorScheme } = useAppStyles();
-
-  const { user, loading } = useUser();
+  const { user } = useUser();
   const scrollRef = useRef(null);
-  const [storyName, SetStoryName] = useState("");
-  const [storyPeople, SetStoryPeople] = useState("");
-  const [storyStar, SetStoryStar] = useState("");
-  const [storyTag, SetStoryTag] = useState([]);
-  const [pageStatus, SetPageStatus] = useState(0);
-  const [currentStories, SetCurrentStories] = useState([]);
-  const [filterSec, OpenFilterSec] = useState(false);
 
-  /* 下拉選單資料 */
+  /* ── 搜尋篩選狀態 ── */
+  const [storyName, setStoryName] = useState("");
+  const [storyPeople, setStoryPeople] = useState("");
+  const [storyStar, setStoryStar] = useState("");
+  const [storyTag, setStoryTag] = useState([]);
+  const [filterSec, openFilterSec] = useState(false);
+
+  /* ── 資料庫資料狀態 ── */
+  const [allGroups, setAllGroups] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [dbLoading, setDbLoading] = useState(true);
+
+  const sectionLabelColor = isLight ? "#555" : "#aaa";
+  const sectionTitleSize = 17;
+
   const optionsPeople = [
-    { value: 4, label: "4人" },
-    { value: 5, label: "5人" },
-    { value: 6, label: "6人" },
-    { value: 7, label: "7人" },
-    { value: 8, label: "8人" },
-    { value: 9, label: "9人" },
-    { value: 10, label: "10人以上" },
+    { value: "1", label: "缺 1 人" },
+    { value: "2", label: "缺 2 人" },
+    { value: "3", label: "缺 3 人" },
+    { value: "4", label: "缺 4 人以上" },
   ];
   const optionsLevel = [
     { value: 1, label: "★ 1" },
@@ -52,77 +58,81 @@ export default function OrganizeHome() {
     { value: 5, label: "★ 5" },
   ];
 
-  /* 劇本查詢 */
-  const StorySearch = function (stories) {
-    const newStories = stories.filter((item) => {
-      const matchName =
-        storyName !== ""
-          ? storyName
-              .split("")
-              .every((char) =>
-                item.title.toLowerCase().includes(char.toLowerCase()),
-              )
-          : true;
+  useEffect(() => {
+    const loadData = async () => {
+      setDbLoading(true);
+      try {
+        const { fetchedGroups } = await fetchGroupsList(null);
+        setAllGroups(fetchedGroups || []);
+        setSearchResults(fetchedGroups || []);
+      } catch (error) {
+        console.error("初始化野團列表失敗:", error);
+      } finally {
+        setDbLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
-      const matchTag =
-        storyTag.length > 0
-          ? storyTag.every((tag) => item.tag.includes(tag))
-          : true;
+  const recentGroups = useMemo(() => {
+    return [...allGroups]
+      .filter((g) => g.neededPeople > 0)
+      .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+      .slice(0, 5);
+  }, [allGroups]);
 
-      const matchPeople =
-        storyPeople !== ""
-          ? (() => {
-              if (!Array.isArray(item.people) || item.people.length === 0) {
-                return String(item.people) === String(storyPeople);
-              }
+  const handleSearch = () => {
+    let filtered = [...allGroups];
 
-              const selectedNum = Number(storyPeople);
-              if (item.people.length > 1) {
-                const min = Math.min(...item.people);
-                const max = Math.max(...item.people);
-
-                return selectedNum >= min && selectedNum <= max;
-              }
-
-              return item.people.map(String).includes(String(storyPeople));
-            })()
-          : true;
-
-      const matchStar = storyStar !== "" ? item.star === storyStar : true;
-
-      return matchName && matchTag && matchPeople && matchStar;
-    });
-
-    const isFilter =
-      storyName !== "" ||
-      storyTag.length > 0 ||
-      storyPeople !== "" ||
-      storyStar !== "";
-    if (isFilter) {
-      SetCurrentStories(newStories);
-      SetPageStatus(1);
-    } else {
-      SetCurrentStories([]);
-      SetPageStatus(0);
+    if (storyName.trim()) {
+      filtered = filtered.filter((g) =>
+        g.title.toLowerCase().includes(storyName.toLowerCase()),
+      );
     }
+    if (storyPeople) {
+      filtered = filtered.filter((g) => {
+        if (storyPeople === "4+") return g.neededPeople >= 4;
+        return g.neededPeople === Number(storyPeople);
+      });
+    }
+
+    setSearchResults(filtered);
+    setVisibleCount(PAGE_SIZE);
   };
+
+  const handleClearSearch = () => {
+    setStoryName("");
+    setStoryPeople("");
+    setStoryStar("");
+    setStoryTag([]);
+    setSearchResults(allGroups);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + PAGE_SIZE);
+  };
+
+  const visibleResults = searchResults.slice(0, visibleCount);
+  const hasMore = visibleCount < searchResults.length;
 
   return (
     <>
       <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-        <Stack.Screen />
+        <Stack.Screen options={{ headerShown: false }} />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
+          {/* 修正點 1：移除 contentContainerStyle 中的 styles.container，改用純物件控高，徹底修復無法滾動 */}
           <ScrollView
-            contentContainerStyle={[styles.container, { gap: 32, padding: 20 }]}
+            contentContainerStyle={{ paddingBottom: 100, paddingTop: 10 }}
             showsVerticalScrollIndicator={false}
             ref={scrollRef}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={{ gap: 24, marginBottom: 32 }}>
-              {/* Header */}
+            {/* Header */}
+            <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
               <View
                 style={{
                   width: "100%",
@@ -131,32 +141,13 @@ export default function OrganizeHome() {
                   flexDirection: "row",
                 }}
               >
-                <Pressable
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.5 : styles.cardIcon.opacity,
-                    alignItems: "flex-start",
-                  })}
-                  onPress={() => {
-                    router.back();
-                  }}
-                >
+                <Pressable onPress={() => router.back()}>
                   <ChevronLeft size={24} style={styles.cardIcon} />
                 </Pressable>
-                <Text
-                  style={[
-                    styles.title,
-                    { alignItems: "center", textAlign: "center" },
-                  ]}
-                >
+                <Text style={[styles.title, { textAlign: "center" }]}>
                   野團一覽
                 </Text>
-                <Pressable
-                  onPress={() => router.push("/subPage/Organize")}
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.5 : styles.cardIcon.opacity,
-                    alignItems: "flex-start",
-                  })}
-                >
+                <Pressable onPress={() => router.push("/subPage/Organize")}>
                   <Plus
                     color={isLight ? "#000" : "#fff"}
                     opacity={0.8}
@@ -164,41 +155,96 @@ export default function OrganizeHome() {
                   />
                 </Pressable>
               </View>
+            </View>
 
-              {/* Search and Filter */}
+            {/* 最近揪團 (橫向滑動) */}
+            <View style={{ marginVertical: 16 }}>
+              <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
+                <Text style={[styles.title, { fontSize: sectionTitleSize }]}>
+                  🔥 即將截止揪團
+                </Text>
+              </View>
+
+              {dbLoading ? (
+                <ActivityIndicator size="small" color="#FFA000" />
+              ) : recentGroups.length === 0 ? (
+                <Text
+                  style={{
+                    paddingHorizontal: 20,
+                    fontSize: 13,
+                    color: sectionLabelColor,
+                  }}
+                >
+                  目前沒有即將截止的揪團
+                </Text>
+              ) : (
+                /* 修正點 2：移除 gap 屬性，改用傳統 flexDirection 容器控寬，確保卡片大小正常 */
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 20,
+                    flexDirection: "row",
+                  }}
+                >
+                  {recentGroups.map((group) => (
+                    <RecentGroupCard
+                      key={`recent-${group.id}`}
+                      group={group}
+                      isLight={isLight}
+                      colorScheme={colorScheme}
+                    />
+                  ))}
+                </ScrollView>
+              )}
+            </View>
+
+            {/* 劇本查詢與列表 */}
+            <View style={{ gap: 16, paddingHorizontal: 20, marginTop: 8 }}>
+              <Text style={[styles.title, { fontSize: sectionTitleSize }]}>
+                尋找揪團
+              </Text>
+
+              {/* 搜尋列 */}
               <View
                 style={{
                   flexDirection: "row",
-                  justifyContent: "jusitfy-around",
                   alignItems: "center",
                   width: "100%",
-                  gap: 24,
+                  gap: 12,
                 }}
               >
-                <View style={styles.searchFrame1}>
-                  <Search style={styles.cardIcon} />
+                <View
+                  style={[
+                    styles.searchFrame1,
+                    {
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingHorizontal: 10,
+                    },
+                  ]}
+                >
+                  <Search style={styles.cardIcon} size={20} />
                   <TextInput
                     value={storyName}
-                    onChangeText={(text) => {
-                      SetStoryName(text);
-                    }}
-                    placeholder="劇本名稱"
+                    onChangeText={setStoryName}
+                    placeholder="搜尋揪團名稱或劇本..."
                     placeholderTextColor={`${styles.content3.color}66`}
                     style={[
                       styles.content1,
-                      { paddingVertical: 8, height: "100%" },
+                      {
+                        paddingVertical: 8,
+                        height: 45,
+                        flex: 1,
+                        marginLeft: 8,
+                      },
                     ]}
                   />
                 </View>
                 <Pressable
-                  style={({ pressed }) => (
-                    {
-                      opacity: pressed ? 0.5 : styles.cardIcon.opacity,
-                      alignItems: "flex-start",
-                    },
-                    { position: "relative", top: 8 }
-                  )}
-                  onPress={() => OpenFilterSec(!filterSec)}
+                  style={{ justifyContent: "center" }}
+                  onPress={() => openFilterSec(!filterSec)}
                 >
                   <ListFilter
                     color={isLight ? "#000" : "#fff"}
@@ -207,70 +253,116 @@ export default function OrganizeHome() {
                   />
                 </Pressable>
               </View>
-              <View
-                style={{
-                  gap: 16,
-                  display: filterSec ? "flex" : "none",
-                }}
-              >
-                <MultipleSelectFunc
-                  colorScheme={colorScheme}
-                  value={storyTag}
-                  onValueChange={SetStoryTag}
-                />
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <View style={{ width: "47%" }}>
-                    <SelectFunc
-                      colorScheme={colorScheme}
-                      placeholder={"人數"}
-                      options={optionsPeople}
-                      value={storyPeople}
-                      onValueChange={SetStoryPeople}
-                    />
-                  </View>
-                  <View style={{ width: "47%" }}>
-                    <SelectFunc
-                      colorScheme={colorScheme}
-                      placeholder={"難度"}
-                      options={optionsLevel}
-                      value={storyStar}
-                      onValueChange={SetStoryStar}
-                    />
+
+              {/* 進階篩選抽屜 */}
+              {filterSec && (
+                <View style={{ gap: 12 }}>
+                  <MultipleSelectFunc
+                    colorScheme={colorScheme}
+                    value={storyTag}
+                    onValueChange={setStoryTag}
+                  />
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View style={{ width: "47%" }}>
+                      <SelectFunc
+                        colorScheme={colorScheme}
+                        placeholder="目前缺人數"
+                        options={optionsPeople}
+                        value={storyPeople}
+                        onValueChange={setStoryPeople}
+                      />
+                    </View>
+                    <View style={{ width: "47%" }}>
+                      <SelectFunc
+                        colorScheme={colorScheme}
+                        placeholder="難度"
+                        options={optionsLevel}
+                        value={storyStar}
+                        onValueChange={setStoryStar}
+                      />
+                    </View>
                   </View>
                 </View>
+              )}
+
+              {/* 功能按鈕 */}
+              <Btn
+                colorScheme={colorScheme}
+                font="搜尋"
+                func={handleSearch}
+                btnType={1}
+              />
+              {storyName || storyPeople || storyStar || storyTag.length > 0 ? (
                 <Btn
                   colorScheme={colorScheme}
-                  font={"搜尋"}
-                  func={() => StorySearch(stories)}
-                  btnType={1}
+                  font="清空搜尋"
+                  func={handleClearSearch}
+                  btnType={0}
                 />
-                {pageStatus === 1 && (
-                  <Btn
-                    colorScheme={colorScheme}
-                    font={"清空搜尋"}
-                    func={() => {
-                      SetPageStatus(0);
-                      SetStoryName("");
-                      SetStoryPeople("");
-                      SetStoryStar("");
-                      SetStoryTag([]);
-                      SetCurrentStories([]);
+              ) : null}
+
+              {/* 滿版縱向列表 */}
+              <View style={{ gap: 16, marginTop: 12, width: "100%" }}>
+                {dbLoading ? (
+                  <ActivityIndicator size="large" color="#FFA000" />
+                ) : visibleResults.length === 0 ? (
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: sectionLabelColor,
+                      textAlign: "center",
+                      paddingVertical: 16,
                     }}
-                    btnType={0}
-                  />
+                  >
+                    找不到任何開放中的揪團
+                  </Text>
+                ) : (
+                  <>
+                    {visibleResults.map((group) => (
+                      <GroupListCard
+                        key={`list-${group.id}`}
+                        group={group}
+                        isLight={isLight}
+                        colorScheme={colorScheme}
+                      />
+                    ))}
+
+                    {hasMore && (
+                      <Pressable
+                        onPress={handleLoadMore}
+                        style={({ pressed }) => ({
+                          opacity: pressed ? 0.6 : 1,
+                          alignItems: "center",
+                          paddingVertical: 14,
+                          borderRadius: 10,
+                          borderWidth: 1.5,
+                          borderColor: "#FFA000",
+                          marginTop: 6,
+                        })}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "bold",
+                            color: "#FFA000",
+                          }}
+                        >
+                          查看更多（剩餘 {searchResults.length - visibleCount}{" "}
+                          筆）
+                        </Text>
+                      </Pressable>
+                    )}
+                  </>
                 )}
               </View>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-
-        <View style={{ height: 120 }} />
       </SafeAreaView>
       <Footer page={1} />
     </>

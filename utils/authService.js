@@ -61,6 +61,8 @@ export const checkSignUp = async (email, password, extraData) => {
       email: extraData.email,
       appointments: [],
       coupon: [],
+      organizedGroups: [],
+      joinedGroups: [],
     });
 
     return user;
@@ -329,4 +331,139 @@ export const subscribeUserData = (callback) => {
   );
 
   return unsubscribe;
+};
+
+// 建立揪團
+export const createGroupEvent = async (groupData) => {
+  const {
+    userId,
+    hostPhotoURL = "",
+    storyId,
+    title,
+    startDate,
+    endDate,
+    currentPeople,
+    neededPeople,
+    selectVerify,
+    otherRequire,
+  } = groupData;
+
+  // 揪團 ID
+  const groupId = `group_${Date.now()}_${userId}`;
+
+  const groupRef = doc(db, "groups", groupId);
+  const userRef = doc(db, "users", userId);
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      // 建立揪團資料
+      transaction.set(groupRef, {
+        groupId: groupId,
+        hostId: userId,
+        hostPhotoURL: hostPhotoURL,
+        storyId: storyId,
+        title: title,
+        startDate: startDate,
+        endDate: endDate,
+        currentPeople: currentPeople,
+        neededPeople: neededPeople,
+        selectVerify: selectVerify,
+        otherRequire: otherRequire,
+        status: "open", // open, full, closed 等狀態
+        participants: [userId],
+        createdAt: serverTimestamp(),
+      });
+
+      transaction.update(userRef, {
+        organizedGroups: arrayUnion(groupId),
+        joinedGroups: arrayUnion(groupId),
+      });
+    });
+    return { success: true, groupId };
+  } catch (error) {
+    console.error("建立揪團失敗:", error);
+    throw error;
+  }
+};
+
+import {
+  // ... 其他已引入的方法
+  orderBy,
+  limit,
+  startAfter,
+} from "firebase/firestore";
+
+// --- 以下新增 ---
+
+/**
+ * 依據開始日期抓取前 10 筆開放中的揪團
+ */
+export const fetchGroupsList = async (lastDoc = null) => {
+  try {
+    const groupsRef = collection(db, "groups");
+    let q = query(
+      groupsRef,
+      where("status", "==", "open"), // 僅抓取開放中的揪團
+      orderBy("startDate", "asc"), // 依開始日期排序
+      limit(10), // 每次 10 筆
+    );
+
+    if (lastDoc) {
+      q = query(
+        groupsRef,
+        where("status", "==", "open"),
+        orderBy("startDate", "asc"),
+        startAfter(lastDoc),
+        limit(10),
+      );
+    }
+
+    const snapshot = await getDocs(q);
+    const fetchedGroups = [];
+    snapshot.forEach((doc) => {
+      fetchedGroups.push({ id: doc.id, ...doc.data() });
+    });
+    const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+
+    return { fetchedGroups, lastVisible };
+  } catch (error) {
+    console.error("抓取揪團失敗:", error);
+    throw error;
+  }
+};
+
+export const joinGroupEvent = async (groupId, userId) => {
+  const groupRef = doc(db, "groups", groupId);
+  const userRef = doc(db, "users", userId);
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const groupSnap = await transaction.get(groupRef);
+      if (!groupSnap.exists()) throw new Error("該揪團不存在或已關閉");
+
+      const groupData = groupSnap.data();
+
+      if (groupData.participants && groupData.participants.includes(userId)) {
+        throw new Error("您已經加入此揪團了！");
+      }
+
+      if (!groupData.selectVerify) {
+        const currentJoined = (groupData.participants?.length || 1) - 1;
+        if (currentJoined >= groupData.neededPeople) {
+          throw new Error("此揪團人數已滿，無法加入！");
+        }
+      }
+      transaction.update(groupRef, {
+        participants: arrayUnion(userId),
+      });
+
+      transaction.update(userRef, {
+        joinedGroups: arrayUnion(groupId),
+      });
+    });
+
+    return { success: true };
+  } catch (error) {
+    throw error;
+  }
 };
