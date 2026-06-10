@@ -25,6 +25,9 @@ import {
   query,
   where,
   writeBatch,
+  orderBy,
+  limit,
+  startAfter,
 } from "firebase/firestore";
 import { savePassword, getPassword } from "./secureStorage";
 import { use } from "react";
@@ -386,18 +389,6 @@ export const createGroupEvent = async (groupData) => {
   }
 };
 
-import {
-  // ... 其他已引入的方法
-  orderBy,
-  limit,
-  startAfter,
-} from "firebase/firestore";
-
-// --- 以下新增 ---
-
-/**
- * 依據開始日期抓取前 10 筆開放中的揪團
- */
 export const fetchGroupsList = async (lastDoc = null) => {
   try {
     const groupsRef = collection(db, "groups");

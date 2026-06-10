@@ -20,6 +20,7 @@ import MultipleSelectFunc from "../../components/MultipleSelectFunc";
 import { Plus, Search, ChevronLeft, ListFilter } from "lucide-react-native";
 import { fetchGroupsList } from "../../utils/authService";
 import { RecentGroupCard, GroupListCard } from "../../components/OrganizeCard";
+import ScrollTop from "../../components/ScrollTop";
 
 const PAGE_SIZE = 10;
 
@@ -31,58 +32,120 @@ export default function OrganizeHome() {
   /* ── 搜尋篩選狀態 ── */
   const [storyName, setStoryName] = useState("");
   const [storyPeople, setStoryPeople] = useState("");
-  const [storyStar, setStoryStar] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [storyTag, setStoryTag] = useState([]);
   const [filterSec, openFilterSec] = useState(false);
 
-  /* ── 資料庫資料狀態 ── */
+  /* ── 資料庫分頁與載入狀態 ── */
   const [allGroups, setAllGroups] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [lastDoc, setLastDoc] = useState(null);
   const [dbLoading, setDbLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
 
   const sectionLabelColor = isLight ? "#555" : "#aaa";
   const sectionTitleSize = 17;
+
+  const todayStr = useMemo(() => {
+    return new Date().toISOString().split("T")[0];
+  }, []);
 
   const optionsPeople = [
     { value: "1", label: "缺 1 人" },
     { value: "2", label: "缺 2 人" },
     { value: "3", label: "缺 3 人" },
-    { value: "4", label: "缺 4 人以上" },
+    { value: "4+", label: "缺 4 人以上" },
   ];
-  const optionsLevel = [
-    { value: 1, label: "★ 1" },
-    { value: 2, label: "★ 2" },
-    { value: 3, label: "★ 3" },
-    { value: 4, label: "★ 4" },
-    { value: 5, label: "★ 5" },
+
+  const optionsSort = [
+    { value: "asc", label: "截止日期：由近到遠" },
+    { value: "desc", label: "截止日期：由遠到近" },
   ];
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadInitialData = async () => {
       setDbLoading(true);
       try {
-        const { fetchedGroups } = await fetchGroupsList(null);
-        setAllGroups(fetchedGroups || []);
-        setSearchResults(fetchedGroups || []);
+        const { fetchedGroups, lastVisible } = await fetchGroupsList(null);
+        const data = fetchedGroups || [];
+
+        setAllGroups(data);
+
+        // 過濾未過期資料
+        const unexpiredData = data.filter((g) => g.endDate >= todayStr);
+        unexpiredData.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+
+        setSearchResults(unexpiredData);
+        setLastDoc(lastVisible);
+        setHasMore(data.length === 10);
       } catch (error) {
         console.error("初始化野團列表失敗:", error);
       } finally {
         setDbLoading(false);
       }
     };
-    loadData();
-  }, []);
+    loadInitialData();
+  }, [todayStr]);
 
+  // 計算即將截止揪團
   const recentGroups = useMemo(() => {
     return [...allGroups]
-      .filter((g) => g.neededPeople > 0)
+      .filter((g) => g.neededPeople > 0 && g.endDate >= todayStr)
       .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
       .slice(0, 5);
-  }, [allGroups]);
+  }, [allGroups, todayStr]);
 
+  // 載入更多
+  const handleLoadMore = async () => {
+    if (loadingMore || !lastDoc) return;
+    setLoadingMore(true);
+    try {
+      const { fetchedGroups, lastVisible } = await fetchGroupsList(lastDoc);
+      const data = fetchedGroups || [];
+
+      if (data.length > 0) {
+        const updatedAll = [...allGroups, ...data];
+        setAllGroups(updatedAll);
+
+        let filtered = updatedAll.filter((g) => g.endDate >= todayStr);
+
+        // 條件過濾
+        if (storyName.trim()) {
+          filtered = filtered.filter((g) =>
+            g.title.toLowerCase().includes(storyName.toLowerCase()),
+          );
+        }
+        if (storyPeople) {
+          filtered = filtered.filter((g) => {
+            if (storyPeople === "4+") return g.neededPeople >= 4;
+            return g.neededPeople === Number(storyPeople);
+          });
+        }
+
+        filtered.sort((a, b) => {
+          return sortOrder === "desc"
+            ? new Date(b.endDate) - new Date(a.endDate)
+            : new Date(a.endDate) - new Date(b.endDate);
+        });
+
+        setSearchResults(filtered);
+        setLastDoc(lastVisible);
+      }
+
+      if (data.length < 10) {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("加載更多揪團失敗:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // 搜尋過濾
   const handleSearch = () => {
-    let filtered = [...allGroups];
+    let filtered = [...allGroups].filter((g) => g.endDate >= todayStr);
 
     if (storyName.trim()) {
       filtered = filtered.filter((g) =>
@@ -96,25 +159,49 @@ export default function OrganizeHome() {
       });
     }
 
+    filtered.sort((a, b) => {
+      if (sortOrder === "desc") {
+        return new Date(b.endDate) - new Date(a.endDate);
+      } else {
+        return new Date(a.endDate) - new Date(b.endDate);
+      }
+    });
+
     setSearchResults(filtered);
-    setVisibleCount(PAGE_SIZE);
   };
 
+  // 清空搜尋
   const handleClearSearch = () => {
     setStoryName("");
     setStoryPeople("");
-    setStoryStar("");
+    setSortOrder("asc");
     setStoryTag([]);
-    setSearchResults(allGroups);
-    setVisibleCount(PAGE_SIZE);
+
+    const defaultData = allGroups.filter((g) => g.endDate >= todayStr);
+    defaultData.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+    setSearchResults(defaultData);
   };
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + PAGE_SIZE);
-  };
-
-  const visibleResults = searchResults.slice(0, visibleCount);
-  const hasMore = visibleCount < searchResults.length;
+  const isFilteredState = useMemo(() => {
+    const unexpiredTotal = allGroups.filter(
+      (g) => g.endDate >= todayStr,
+    ).length;
+    return (
+      searchResults.length !== unexpiredTotal ||
+      storyName !== "" ||
+      storyPeople !== "" ||
+      sortOrder !== "asc" ||
+      storyTag.length > 0
+    );
+  }, [
+    allGroups,
+    searchResults,
+    todayStr,
+    storyName,
+    storyPeople,
+    sortOrder,
+    storyTag,
+  ]);
 
   return (
     <>
@@ -124,7 +211,6 @@ export default function OrganizeHome() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
-          {/* 修正點 1：移除 contentContainerStyle 中的 styles.container，改用純物件控高，徹底修復無法滾動 */}
           <ScrollView
             contentContainerStyle={{ paddingBottom: 100, paddingTop: 10 }}
             showsVerticalScrollIndicator={false}
@@ -157,11 +243,11 @@ export default function OrganizeHome() {
               </View>
             </View>
 
-            {/* 最近揪團 (橫向滑動) */}
+            {/* 最近揪團 */}
             <View style={{ marginVertical: 16 }}>
               <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
                 <Text style={[styles.title, { fontSize: sectionTitleSize }]}>
-                  🔥 即將截止揪團
+                  即將截止揪團
                 </Text>
               </View>
 
@@ -178,7 +264,6 @@ export default function OrganizeHome() {
                   目前沒有即將截止的揪團
                 </Text>
               ) : (
-                /* 修正點 2：移除 gap 屬性，改用傳統 flexDirection 容器控寬，確保卡片大小正常 */
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -228,7 +313,10 @@ export default function OrganizeHome() {
                   <Search style={styles.cardIcon} size={20} />
                   <TextInput
                     value={storyName}
-                    onChangeText={setStoryName}
+                    onChangeText={(text) => {
+                      setStoryName(text);
+                    }}
+                    onSubmitEditing={handleSearch}
                     placeholder="搜尋揪團名稱或劇本..."
                     placeholderTextColor={`${styles.content3.color}66`}
                     style={[
@@ -247,7 +335,7 @@ export default function OrganizeHome() {
                   onPress={() => openFilterSec(!filterSec)}
                 >
                   <ListFilter
-                    color={isLight ? "#000" : "#fff"}
+                    color={filterSec ? "#FFA000" : isLight ? "#000" : "#fff"}
                     opacity={0.8}
                     size={24}
                   />
@@ -256,7 +344,7 @@ export default function OrganizeHome() {
 
               {/* 進階篩選抽屜 */}
               {filterSec && (
-                <View style={{ gap: 12 }}>
+                <View style={{ gap: 12, marginTop: 4 }}>
                   <MultipleSelectFunc
                     colorScheme={colorScheme}
                     value={storyTag}
@@ -280,37 +368,40 @@ export default function OrganizeHome() {
                     <View style={{ width: "47%" }}>
                       <SelectFunc
                         colorScheme={colorScheme}
-                        placeholder="難度"
-                        options={optionsLevel}
-                        value={storyStar}
-                        onValueChange={setStoryStar}
+                        placeholder="截止日期排序"
+                        options={optionsSort}
+                        value={sortOrder}
+                        onValueChange={setSortOrder}
                       />
                     </View>
+                  </View>
+
+                  <View style={{ gap: 8, marginTop: 4 }}>
+                    <Btn
+                      colorScheme={colorScheme}
+                      font="執行篩選"
+                      func={handleSearch}
+                      btnType={1}
+                    />
                   </View>
                 </View>
               )}
 
-              {/* 功能按鈕 */}
-              <Btn
-                colorScheme={colorScheme}
-                font="搜尋"
-                func={handleSearch}
-                btnType={1}
-              />
-              {storyName || storyPeople || storyStar || storyTag.length > 0 ? (
+              {/* 重置與清空篩選按鈕 */}
+              {isFilteredState && (
                 <Btn
                   colorScheme={colorScheme}
-                  font="清空搜尋"
+                  font="重置並清空篩選"
                   func={handleClearSearch}
                   btnType={0}
                 />
-              ) : null}
+              )}
 
               {/* 滿版縱向列表 */}
-              <View style={{ gap: 16, marginTop: 12, width: "100%" }}>
+              <View style={{ gap: 16, marginTop: 4, width: "100%" }}>
                 {dbLoading ? (
                   <ActivityIndicator size="large" color="#FFA000" />
-                ) : visibleResults.length === 0 ? (
+                ) : searchResults.length === 0 ? (
                   <Text
                     style={{
                       fontSize: 13,
@@ -323,7 +414,7 @@ export default function OrganizeHome() {
                   </Text>
                 ) : (
                   <>
-                    {visibleResults.map((group) => (
+                    {searchResults.map((group) => (
                       <GroupListCard
                         key={`list-${group.id}`}
                         group={group}
@@ -335,6 +426,7 @@ export default function OrganizeHome() {
                     {hasMore && (
                       <Pressable
                         onPress={handleLoadMore}
+                        disabled={loadingMore}
                         style={({ pressed }) => ({
                           opacity: pressed ? 0.6 : 1,
                           alignItems: "center",
@@ -345,16 +437,19 @@ export default function OrganizeHome() {
                           marginTop: 6,
                         })}
                       >
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: "bold",
-                            color: "#FFA000",
-                          }}
-                        >
-                          查看更多（剩餘 {searchResults.length - visibleCount}{" "}
-                          筆）
-                        </Text>
+                        {loadingMore ? (
+                          <ActivityIndicator size="small" color="#FFA000" />
+                        ) : (
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              fontWeight: "bold",
+                              color: "#FFA000",
+                            }}
+                          >
+                            查看更多揪團
+                          </Text>
+                        )}
                       </Pressable>
                     )}
                   </>
@@ -364,6 +459,7 @@ export default function OrganizeHome() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+      <ScrollTop scrollRef={scrollRef} styles={styles} />
       <Footer page={1} />
     </>
   );
