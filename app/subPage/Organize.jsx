@@ -232,14 +232,14 @@ export default function Organize() {
       }
     }
   };
-
+/*
   const maxDate = new Date();
   maxDate.setMonth(maxDate.getMonth() + 2);
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShowDatePicker(Platform.OS === "ios");
     setDate(currentDate);
-  };
+  };*/
 
   // 衝堂計算
   useEffect(() => {
@@ -304,9 +304,10 @@ export default function Organize() {
   const validate = () => {
     let newErrors = {};
 
+    if (!selectedStory) newErrors.stories = "請選擇劇本";
+    if (!storyPeople) newErrors.people = "請選擇當前人數";
+    if (!startDate) newErrors.date = "請選擇預計日期區間";
     if (!formData.agreeTerms) newErrors.terms = "請勾選同意條款";
-    if (!timeSelect) newErrors.timeSelect = "請選擇預約時段";
-    if (!date) newErrors.date = "請選擇預約日期";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
@@ -327,8 +328,8 @@ export default function Organize() {
   const handleNextStep = () => {
     if (validate()) {
       router.push({
-        pathname: "/subPage/CheckReservation",
-        params: {
+        pathname: "/subPage/OrganizeComplete",
+        /*params: {
           data: JSON.stringify({
             ...formData,
             date: formatDate(date),
@@ -341,7 +342,7 @@ export default function Organize() {
               : Number(price) * people,
             duration: durationNum,
           }),
-        },
+        },*/
       });
     }
   };
@@ -383,12 +384,13 @@ export default function Organize() {
                     SetStoryPeople("");
                   }}
                 />
-                {errors.story && (
+                {/*{errors.story && (
                   <Text style={{ color: "red", fontSize: 12 }}>
                     {errors.story}
                   </Text>
-                )}
+                )}*/}
               </View>
+              <ErrorTip msg={errors.stories} />
 
               {/* People */}
               <View style={{ gap: 8 }}>
@@ -402,6 +404,7 @@ export default function Organize() {
                   disabled={!selectedStoryId}
                 />
               </View>
+              <ErrorTip msg={errors.people} />
               {selectedStory && storyPeople && (
                 <View
                   style={{
@@ -647,7 +650,7 @@ export default function Organize() {
                     <Text
                       style={{ fontSize: 16, color: "#fff", fontWeight: 900 }}
                     >
-                      下一步
+                      發布揪團
                     </Text>
                   )}
                 </Pressable>
