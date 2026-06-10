@@ -454,6 +454,15 @@ export default function Organize() {
                   theme={{
                     arrowColor: "#FFA000",
                     textMonthFontWeight: "bold",
+                    backgroundColor: "transparent",
+                    calendarBackground: "transparent",
+
+                    monthTextColor: isLight ? "#000000" : "#FFFFFF",
+                    textSectionTitleColor: isLight ? "#000000" : "#FFFFFF",
+                    dayTextColor: isLight ? "#000000" : "#FFFFFF",
+                    todayTextColor: isLight ? "#000000" : "#FFFFFF",
+                    disabledArrowColor: isLight ? "#CCCCCC" : "#555555",
+                    textDisabledColor: isLight ? "#CCCCCC" : "#666666",
                   }}
                 />
                 {showDatePicker && (
