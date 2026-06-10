@@ -207,14 +207,14 @@ export default function Organize() {
       }
     }
   };
-
+  /*
   const maxDate = new Date();
   maxDate.setMonth(maxDate.getMonth() + 2);
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShowDatePicker(Platform.OS === "ios");
     setDate(currentDate);
-  };
+  };*/
 
   // 錯誤訊息驗證
   const validate = () => {
@@ -276,7 +276,7 @@ export default function Organize() {
               text: "確定",
               onPress: () => {
                 router.dismissAll();
-                router.replace("/subPage/Home"); // 返回系統首頁
+                router.replace("/subPage/OrganizeComplete"); // 返回系統首頁
               },
             },
           ],
@@ -329,6 +329,7 @@ export default function Organize() {
                 />
                 <ErrorTip msg={errors.story} />
               </View>
+              <ErrorTip msg={errors.stories} />
 
               {/* People */}
               <View style={{ gap: 8 }}>
@@ -391,6 +392,15 @@ export default function Organize() {
                   theme={{
                     arrowColor: "#FFA000",
                     textMonthFontWeight: "bold",
+                    backgroundColor: "transparent",
+                    calendarBackground: "transparent",
+
+                    monthTextColor: isLight ? "#000000" : "#FFFFFF",
+                    textSectionTitleColor: isLight ? "#000000" : "#FFFFFF",
+                    dayTextColor: isLight ? "#000000" : "#FFFFFF",
+                    todayTextColor: isLight ? "#000000" : "#FFFFFF",
+                    disabledArrowColor: isLight ? "#CCCCCC" : "#555555",
+                    textDisabledColor: isLight ? "#CCCCCC" : "#666666",
                   }}
                 />
                 {showDatePicker && (
@@ -581,7 +591,7 @@ export default function Organize() {
                     <Text
                       style={{ fontSize: 16, color: "#fff", fontWeight: "900" }}
                     >
-                      確認發起
+                      發布揪團
                     </Text>
                   )}
                 </Pressable>
