@@ -1,13 +1,25 @@
-import { useColorScheme, Pressable, Text } from "react-native";
+import { useColorScheme, Pressable, Text, Alert } from "react-native";
 import { getStyles } from "../utils/styleFormat";
 import { router } from "expo-router";
 import { useAppStyles } from "../utils/useAppStyles";
+import { useUser } from "../utils/userContext";
 
 export default function HomeBtn({ path, name }) {
+  const { isGuest } = useUser();
   const { colorScheme, styles, isLight } = useAppStyles();
   return (
     <Pressable
-      onPress={() => router.push(path)}
+      onPress={() => {
+        if (isGuest && name == "你的揪團") {
+          Alert.alert("提示", "請先註冊或登入", [
+            {
+              text: "確定",
+              onPress: () => router.push("/subPage/LogIn"),
+            },
+          ]);
+          return;
+        } else router.push(path);
+      }}
       style={({ pressed }) => ({
         justifyContent: "center",
         alignItems: "center",
