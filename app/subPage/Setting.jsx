@@ -29,7 +29,6 @@ import {
 } from "lucide-react-native";
 
 import Footer from "../../components/Footer";
-import Header from "../../components/Header";
 import SettingCard from "../../components/SettingCard";
 
 export default function Setting() {
@@ -251,7 +250,7 @@ export default function Setting() {
             showsVerticalScrollIndicator={false}
             ref={scrollRef}
           >
-            <Header styles={styles} font={"設定"} />
+             <Text style={styles.title}>設定</Text>
 
             <View
               style={{

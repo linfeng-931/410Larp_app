@@ -11,19 +11,18 @@ import {
     Image
 } from "react-native";
 import { useLocalSearchParams, Stack, useRouter } from "expo-router";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useFocusEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../firebase";
-import { stories } from "../../utils/story";
+import { useCallback } from "react";
 import LottieView from 'lottie-react-native';
 import Header from "../../components/Header";
 import { useAppStyles } from "../../utils/useAppStyles";
 import { useUser } from "../../utils/userContext";
 import { SendHorizontal } from 'lucide-react-native';
-import { subscribeSingleChatRoom, sendChatMessage, formatMessageTime, fetchChatRoomMembersProfile } from "../../utils/authService";
+import { subscribeSingleChatRoom, sendChatMessage, formatMessageTime, fetchChatRoomMembersProfile, updateRoomLastRead } from "../../utils/authService";
 
 export default function AnRoom() {
-    const { isGuest } = useUser();
     const { styles, isLight } = useAppStyles();
     const scrollRef = useRef(null);
 
@@ -44,7 +43,7 @@ export default function AnRoom() {
     const [error, setError] = useState(null);
 
     const currentUser = auth.currentUser;
-
+    
     // 監聽聊天室訊息變動
     useEffect(() => {
         if (!id) return;
@@ -93,6 +92,20 @@ export default function AnRoom() {
         };
         getMembersData();
     }, [id]);
+
+    useEffect(() => {
+        // 這裡故意留空，因為我們只在乎「離開」的那一刻
+        
+        return () => {
+            if (id && currentUser?.uid) {
+                console.log("使用者離開聊天室，更新最後讀取時間:", id);
+                // 在背景默默執行，不卡頁面銷毀
+                updateRoomLastRead(currentUser.uid, id).catch((err) => {
+                    console.error("離開時更新讀取時間失敗:", err);
+                });
+            }
+        };
+    }, [id, currentUser?.uid]);
 
     if (loading) return <Text>載入成員中...</Text>;
 
@@ -194,7 +207,7 @@ export default function AnRoom() {
                                                 {item.content}
                                             </Text>
                                         </View>
-                                        <Text style={{ textAlign: isUser ? 'right' : 'left', fontSize: 10, color: isLight ? '#00000079' : '#fff' }}>{sendTime}</Text>
+                                        <Text style={{ textAlign: isUser ? 'right' : 'left', fontSize: 10, color: isLight ? '#00000079' : '#ffffff79' }}>{sendTime}</Text>
                                     </View>
 
                                     {isUser && (

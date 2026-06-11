@@ -24,7 +24,7 @@ export default function Header({ styles, font }) {
             >
                 <ChevronLeft size={24} style={styles.cardIcon} />
             </Pressable>
-            <Text style={[styles.title, {alignItems: 'center', textAlign: 'center', width: '30%'}]}>{font}</Text>
+            <Text style={[styles.title, {alignItems: 'center', textAlign: 'center', maxWidth:150}]}>{font}</Text>
             <View style={{alignItems: 'flex-end', width: '30%',}}></View>
         </View>
 

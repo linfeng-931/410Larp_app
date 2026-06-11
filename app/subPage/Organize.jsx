@@ -26,9 +26,8 @@ import { useAppStyles } from "../../utils/useAppStyles";
 import { useUser } from "../../utils/userContext";
 import Footer from "../../components/Footer";
 import { subscribeUserData, createGroupEvent } from "../../utils/authService"; // 確保引入 createGroupEvent
-import { Calendar, CalendarList } from "react-native-calendars";
+import { Calendar } from "react-native-calendars";
 import SelectFunc from "../../components/SelectFun";
-import Card from "../../components/Card";
 import { stories } from "../../utils/story";
 
 export default function Organize() {

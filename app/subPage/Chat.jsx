@@ -102,9 +102,13 @@ export default function Chat() {
                                 gap: 24,
                             }}
                         >
-                            {myChatRooms.map((room) => (
-                                <ChatRoomCard room={room} key={room.id} userProfile={userProfile}/>
-                            ))}
+                            {myChatRooms.length > 0 ? (
+                                myChatRooms.map((room) => (
+                                    <ChatRoomCard room={room} key={room.id} userProfile={userProfile} />
+                                ))
+                            ) : (
+                                <Text style={[styles.content4, {textAlign:'center', justifyContent:'center'}]}>目前無聊天室</Text>
+                            )}
                         </View>
                         <View style={{ height: 48 }} />
                     </ScrollView>

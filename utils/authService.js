@@ -356,6 +356,9 @@ export const createGroupEvent = async (groupData) => {
   // 揪團 ID
   const groupId = `group_${Date.now()}_${userId}`;
 
+  const chatRoomDocRef = doc(collection(db, "chatRooms"));
+  const chatRoomId = chatRoomDocRef.id;
+
   const groupRef = doc(db, "groups", groupId);
   const userRef = doc(db, "users", userId);
 
@@ -379,12 +382,20 @@ export const createGroupEvent = async (groupData) => {
         createdAt: serverTimestamp(),
       });
 
+      transaction.set(chatRoomDocRef, {
+        storyID: storyId,
+        groupID: groupId,
+        userId: [userId],
+        message: [],
+      });
+
       transaction.update(userRef, {
         organizedGroups: arrayUnion(groupId),
         joinedGroups: arrayUnion(groupId),
+        chatRooms: arrayUnion(chatRoomId)
       });
     });
-    return { success: true, groupId };
+    return { success: true, groupId, chatRoomId };
   } catch (error) {
     console.error("建立揪團失敗:", error);
     throw error;
@@ -660,6 +671,63 @@ export const fetchChatRoomMembersProfile = async (roomId) => {
     return profilesMap;
   } catch (error) {
     console.error("fetchChatRoomMembersProfile 發生錯誤:", error);
+    throw error;
+  }
+};
+
+//加入聊天室
+export const joinChatRoom = async (chatRoomId, userId) => {
+  if (!chatRoomId || !userId) {
+    throw new Error("缺少聊天室 ID 或使用者 ID");
+  }
+
+  const roomRef = doc(db, "chatRooms", chatRoomId);
+  const userRef = doc(db, "users", userId);
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const roomSnap = await transaction.get(roomRef);
+      if (!roomSnap.exists()) {
+        throw new Error("該聊天室不存在");
+      }
+
+      const roomData = roomSnap.data();
+      if (roomData.userId && roomData.userId.includes(userId)) {
+        throw new Error("您已經在此聊天室中囉！");
+      }
+
+      transaction.update(roomRef, {
+        userId: arrayUnion(userId)
+      });
+
+      transaction.update(userRef, {
+        chatRooms: arrayUnion(chatRoomId)
+      });
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("加入聊天室失敗:", error);
+    throw error;
+  }
+};
+
+export const fetchChatRoomIdByGroupId = async (groupId) => {
+  if (!groupId) throw new Error("缺少揪團 ID");
+
+  try {
+    const chatRoomsRef = collection(db, "chatRooms");
+    const q = query(chatRoomsRef, where("groupID", "==", groupId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      throw new Error("找不到此揪團對應的聊天室");
+    }
+
+    const roomDoc = querySnapshot.docs[0];
+    return roomDoc.id; 
+  } catch (error) {
+    console.error("fetchChatRoomIdByGroupId 發生錯誤:", error);
     throw error;
   }
 };

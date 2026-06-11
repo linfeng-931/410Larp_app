@@ -21,7 +21,7 @@ import {
 import { stories } from "../../utils/story";
 import { useAppStyles } from "../../utils/useAppStyles";
 import { useUser } from "../../utils/userContext";
-import { joinGroupEvent } from "../../utils/authService";
+import { joinGroupEvent, joinChatRoom, fetchChatRoomIdByGroupId } from "../../utils/authService";
 import Btn from "../../components/Btn";
 import Header from "../../components/Header";
 
@@ -82,9 +82,27 @@ export default function GroupDetail() {
           },
         ]);
       } else {
-        Alert.alert("加入成功", "恭喜您，直接加入揪團成功！", [
-          { text: "確定", onPress: () => router.replace("/subPage/Home") },
-        ]);
+        const targetChatRoomId = await fetchChatRoomIdByGroupId(id);
+        await joinChatRoom(targetChatRoomId, user.uid);
+
+        Alert.alert(
+          "加入成功",
+          "恭喜您成功加入揪團！要不要現在去聊天室和大家打個招呼呢？",
+          [
+            {
+              text: "先去首頁",
+              style: "cancel",
+              onPress: () => router.replace("/subPage/Home")
+            },
+            {
+              text: "前往聊天室",
+              onPress: () => {
+                const roomTitle = storyData?.title || "劇本揪團聊天室";
+                router.replace(`/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`);
+              }
+            },
+          ]
+        );
       }
     } catch (error) {
       Alert.alert("加入失敗", error.message || "發生錯誤，請稍後再試。", [

@@ -6,9 +6,9 @@ import {
 } from "react-native";
 
 import { useAppStyles } from "../utils/useAppStyles";
-import { formatMessageTime, updateRoomLastRead } from "../utils/authService";
+import { formatMessageTime } from "../utils/authService";
 import { stories } from "../utils/story";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 export default function ChatRoomCard({ room, userProfile }) {
     const { styles, isLight } = useAppStyles();
@@ -55,9 +55,6 @@ export default function ChatRoomCard({ room, userProfile }) {
                 }
             ]}
             onPress={async () => {
-                if (userProfile?.uid) {
-                    await updateRoomLastRead(userProfile.uid, room.id);
-                }
                 router.push(`/room/${room.id}?name=${encodeURIComponent(chatRoomName)}`);
             }}
         >
@@ -74,13 +71,16 @@ export default function ChatRoomCard({ room, userProfile }) {
                     </View>
                 )}
                 <View style={{ justifyContent: "center", gap: 8 }}>
-                    <Text style={styles.title}>{chatRoomName}</Text>
-                    <Text style={styles.content4}>{chatRoomMessage ? chatRoomMessage : ''}</Text>
+                    <Text style={[styles.title, {maxWidth:170}]}>{chatRoomName}</Text>
+                    <Text style={{fontSize: 14, color: isLight ? '#00000079' : '#ffffff79'}}>{chatRoomMessage ? chatRoomMessage : ''}</Text>
                 </View>
             </View>
             <View style={{ justifyContent: "center", gap: 8, alignItems: 'flex-end' }}>
-                <Text style={styles.content4}>{time}</Text>
-                <Text style={{ color: '#fff', backgroundColor: '#FFA000', borderRadius: 100, padding: 5, minWidth: 28, height: 28, textAlign: 'center', lineHeight: 17, fontWeight: 600 }}>{countOfMessage}</Text>
+                <Text style={{fontSize: 10, color: isLight ? '#00000079' : '#ffffff79'}}>{time}</Text>
+                {countOfMessage != 0 ?
+                    <Text style={{ color: '#fff', backgroundColor: '#FFA000', borderRadius: 100, padding: 5, minWidth: 28, height: 28, textAlign: 'center', lineHeight: 17, fontWeight: 600 }}>{countOfMessage}</Text>:
+                    <Text style={{ borderRadius: 100, padding: 5, minWidth: 28, height: 28}}></Text>
+                }
             </View>
         </Pressable>
     )
