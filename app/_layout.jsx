@@ -39,6 +39,7 @@ export default function RootLayout() {
             <Stack.Screen name="subPage/Setting" />
             <Stack.Screen name="subPage/AccountSetting" />
             <Stack.Screen name="subPage/Chat" />
+            <Stack.Screen name="room/[id]" />
           </Stack>
           <StatusBar style="auto" />
         </KeyboardProvider>

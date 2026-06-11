@@ -66,6 +66,8 @@ export const checkSignUp = async (email, password, extraData) => {
       coupon: [],
       organizedGroups: [],
       joinedGroups: [],
+      chatRooms: [],
+      lastRead: {},
     });
 
     return user;
@@ -470,6 +472,194 @@ export const joinGroupEvent = async (groupId, userId) => {
 
     return { success: true, type: resultType };
   } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchUserChatRooms = async (chatRoomIds) => {
+  if (!chatRoomIds || chatRoomIds.length === 0) return [];
+
+  try {
+    const roomPromises = chatRoomIds.map(async (roomId) => {
+      const roomRef = doc(db, "chatRooms", roomId);
+      const roomSnap = await getDoc(roomRef);
+
+      if (roomSnap.exists()) {
+        return { id: roomSnap.id, ...roomSnap.data() };
+      }
+      return null;
+    });
+
+    const resolvedRooms = await Promise.all(roomPromises);
+    return resolvedRooms.filter((room) => room !== null);
+  } catch (error) {
+    console.error("fetchUserChatRooms 發生錯誤:", error);
+    throw error;
+  }
+};
+
+export const subscribeUserChatRooms = (chatRoomIds, callback) => {
+  if (!chatRoomIds || chatRoomIds.length === 0) {
+    callback([]);
+    return () => {};
+  }
+
+  // 用來存放每個聊天室最新狀態的暫存物件
+  const roomsMap = {};
+
+  // 訂閱所有個別的聊天室
+  const unsubscribes = chatRoomIds.map((roomId) => {
+    const roomRef = doc(db, "chatRooms", roomId);
+
+    return onSnapshot(roomRef, (snapshot) => {
+      if (snapshot.exists()) {
+        // 將更新的資料寫入暫存
+        roomsMap[roomId] = { id: snapshot.id, ...snapshot.data() };
+      } else {
+        delete roomsMap[roomId];
+      }
+      
+      const updatedRoomsList = Object.values(roomsMap);
+      
+      // 進行重新渲染
+      callback(updatedRoomsList);
+    }, (error) => {
+      console.error(`監聽聊天室 ${roomId} 失敗:`, error);
+    });
+  });
+
+  // 回傳一個綜合的解除監聽函式
+  return () => {
+    unsubscribes.forEach((unsub) => unsub());
+  };
+};
+
+export const updateRoomLastRead = async (userId, roomId) => {
+  if (!userId || !roomId) return;
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      [`lastRead.${roomId}`]: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("更新最後讀取時間失敗:", error);
+  }
+};
+
+export const formatMessageTime = (firestoreTimestamp) => {
+  if (!firestoreTimestamp) return "";
+  const msgDate = firestoreTimestamp.toDate ? firestoreTimestamp.toDate() : new Date(firestoreTimestamp);
+  
+  const now = new Date();
+
+  // 比較日期
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  const compareDate = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+
+  // 回傳對應格式
+  if (compareDate.getTime() === today.getTime()) {
+    // 今天
+    const hours = String(msgDate.getHours()).padStart(2, '0');
+    const minutes = String(msgDate.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  } else if (compareDate.getTime() === yesterday.getTime()) {
+    // 昨天
+    return "昨天";
+  } else {
+    // 超過昨天
+    const month = msgDate.getMonth() + 1;
+    const date = msgDate.getDate();
+    return `${month}/${date}`;
+  }
+};
+
+export const subscribeSingleChatRoom = (roomId, callback) => {
+  if (!roomId) return () => {};
+  
+  const roomRef = doc(db, "chatRooms", roomId);
+  
+  return onSnapshot(roomRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+      callback(data.message || []);
+    } else {
+      console.log("該聊天室不存在");
+      callback([]);
+    }
+  }, (error) => {
+    console.error(`監聽聊天室 ${roomId} 失敗:`, error);
+  });
+};
+
+export const sendChatMessage = async (roomId, userId, content) => {
+  if (!roomId || !userId || !content.trim()) return;
+
+  const roomRef = doc(db, "chatRooms", roomId);
+  const newMsg = {
+    content: content,
+    user: userId,
+    time: new Date()
+  };
+
+  try {
+    await updateDoc(roomRef, {
+      message: arrayUnion(newMsg)
+    });
+  } catch (error) {
+    console.error("發送新訊息至資料庫失敗:", error);
+    throw error;
+  }
+};
+
+// 聊天室存取使用者資料
+export const fetchChatRoomMembersProfile = async (roomId) => {
+  if (!roomId) return {};
+
+  try {
+    const roomRef = doc(db, "chatRooms", roomId);
+    const roomSnap = await getDoc(roomRef);
+
+    if (!roomSnap.exists()) {
+      console.log("找不到該聊天室文件");
+      return {};
+    }
+
+    const roomData = roomSnap.data();
+    const userIds = roomData.userId || []; 
+
+    if (userIds.length === 0) return {};
+
+    const profilePromises = userIds.map(async (uid) => {
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        return {
+          uid: uid,
+          photoURL: userData.photoURL || "", 
+          displayName: userData.displayName || "神祕使用者"
+        };
+      }
+      return null;
+    });
+
+    const resolvedProfiles = await Promise.all(profilePromises);
+    
+    const profilesMap = {};
+    resolvedProfiles.forEach((profile) => {
+      if (profile) {
+        profilesMap[profile.uid] = {
+          photoURL: profile.photoURL,
+          displayName: profile.displayName
+        };
+      }
+    });
+
+    return profilesMap;
+  } catch (error) {
+    console.error("fetchChatRoomMembersProfile 發生錯誤:", error);
     throw error;
   }
 };
