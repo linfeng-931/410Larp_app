@@ -21,15 +21,22 @@ import {
 import { stories } from "../../utils/story";
 import { useAppStyles } from "../../utils/useAppStyles";
 import { useUser } from "../../utils/userContext";
-import { joinGroupEvent, joinChatRoom, fetchChatRoomIdByGroupId } from "../../utils/authService";
+import {
+  joinGroupEvent,
+  joinChatRoom,
+  fetchChatRoomIdByGroupId,
+} from "../../utils/authService";
 import Btn from "../../components/Btn";
 import Header from "../../components/Header";
 
 export default function GroupDetail() {
   const { id } = useLocalSearchParams();
+  const paramsData = useLocalSearchParams() || {};
   const router = useRouter();
   const { styles, colorScheme } = useAppStyles();
   const { user, isGuest } = useUser();
+
+  const isJoinBtnVisible = paramsData.showJoinBtn !== "false";
 
   const [groupData, setGroupData] = useState(null);
   const [storyData, setStoryData] = useState(null);
@@ -92,16 +99,18 @@ export default function GroupDetail() {
             {
               text: "先去首頁",
               style: "cancel",
-              onPress: () => router.replace("/subPage/Home")
+              onPress: () => router.replace("/subPage/Home"),
             },
             {
               text: "前往聊天室",
               onPress: () => {
                 const roomTitle = storyData?.title || "劇本揪團聊天室";
-                router.replace(`/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`);
-              }
+                router.replace(
+                  `/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`,
+                );
+              },
             },
-          ]
+          ],
         );
       }
     } catch (error) {
@@ -217,10 +226,17 @@ export default function GroupDetail() {
               </Text>
             </View>
 
-            <View style={{ width: "100%", marginTop: 16, marginBottom: 40 }}>
+            <View
+              style={{
+                width: "100%",
+                marginTop: 16,
+                marginBottom: 40,
+                display: isJoinBtnVisible ? "flex" : "none",
+              }}
+            >
               <Btn
                 colorScheme={colorScheme}
-                font={joining ? "處理中..." : "參與揪團"}
+                font={joining ? "處理中..." : "參與野團"}
                 func={handleJoin}
                 btnType={1}
                 disabled={joining}

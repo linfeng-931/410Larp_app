@@ -32,7 +32,7 @@ export default function OrganizeHome() {
   /* ── 搜尋篩選狀態 ── */
   const [storyName, setStoryName] = useState("");
   const [storyPeople, setStoryPeople] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOrder, setSortOrder] = useState("");
   const [storyTag, setStoryTag] = useState([]);
   const [filterSec, openFilterSec] = useState(false);
 
@@ -42,8 +42,8 @@ export default function OrganizeHome() {
   const [lastDoc, setLastDoc] = useState(null);
   const [dbLoading, setDbLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [hasMore, setHasMore] = useState(false); // 伺服器是否還有資料
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE); // 畫面上顯示的數量
 
   const sectionLabelColor = isLight ? "#555" : "#aaa";
   const sectionTitleSize = 17;
@@ -70,16 +70,18 @@ export default function OrganizeHome() {
       try {
         const { fetchedGroups, lastVisible } = await fetchGroupsList(null);
         const data = fetchedGroups || [];
-
         setAllGroups(data);
+
         const unexpiredData = data.filter(
           (g) => g.endDate >= todayStr && g.neededPeople > 0,
         );
-        unexpiredData.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+        unexpiredData.sort(
+          (a, b) => new Date(a.startDate) - new Date(b.startDate),
+        );
 
         setSearchResults(unexpiredData);
         setLastDoc(lastVisible);
-        setHasMore(data.length === 10);
+        setHasMore(data.length === PAGE_SIZE);
       } catch (error) {
         console.error("初始化野團列表失敗:", error);
       } finally {
@@ -96,9 +98,14 @@ export default function OrganizeHome() {
       .slice(0, 5);
   }, [allGroups, todayStr]);
 
-  // 載入更多
   const handleLoadMore = async () => {
-    if (loadingMore || !lastDoc) return;
+    if (loadingMore) return;
+    if (visibleCount < searchResults.length) {
+      setVisibleCount((prev) => prev + PAGE_SIZE);
+      return;
+    }
+    if (!lastDoc || !hasMore) return;
+
     setLoadingMore(true);
     try {
       const { fetchedGroups, lastVisible } = await fetchGroupsList(lastDoc);
@@ -125,19 +132,22 @@ export default function OrganizeHome() {
         }
 
         filtered.sort((a, b) => {
-          return sortOrder === "desc"
-            ? new Date(b.endDate) - new Date(a.endDate)
-            : new Date(a.endDate) - new Date(b.endDate);
+          if (sortOrder === "desc") {
+            return new Date(b.endDate) - new Date(a.endDate);
+          } else if (sortOrder === "asc") {
+            return new Date(a.endDate) - new Date(b.endDate);
+          } else {
+            return new Date(a.startDate) - new Date(b.startDate);
+          }
         });
 
         setSearchResults(filtered);
         setLastDoc(lastVisible);
       }
 
-      // 增加目前顯示的數量
       setVisibleCount((prev) => prev + PAGE_SIZE);
 
-      if (data.length < 10) {
+      if (data.length < PAGE_SIZE) {
         setHasMore(false);
       }
     } catch (error) {
@@ -147,7 +157,7 @@ export default function OrganizeHome() {
     }
   };
 
-  // 搜尋過濾
+  // 搜尋
   const handleSearch = () => {
     let filtered = [...allGroups].filter(
       (g) => g.endDate >= todayStr && g.neededPeople > 0,
@@ -168,26 +178,29 @@ export default function OrganizeHome() {
     filtered.sort((a, b) => {
       if (sortOrder === "desc") {
         return new Date(b.endDate) - new Date(a.endDate);
-      } else {
+      } else if (sortOrder === "asc") {
         return new Date(a.endDate) - new Date(b.endDate);
+      } else {
+        return new Date(a.startDate) - new Date(b.startDate);
       }
     });
 
     setSearchResults(filtered);
-    setVisibleCount(PAGE_SIZE); // 搜尋時重置顯示數量
+    setVisibleCount(PAGE_SIZE);
   };
 
-  // 清空搜尋
+  // 4. 清空
   const handleClearSearch = () => {
     setStoryName("");
     setStoryPeople("");
-    setSortOrder("asc");
+    setSortOrder(""); // 重置回空值
     setStoryTag([]);
 
     const defaultData = allGroups.filter(
       (g) => g.endDate >= todayStr && g.neededPeople > 0,
     );
-    defaultData.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+    // 重置時回到開始日期排序
+    defaultData.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
     setSearchResults(defaultData);
     setVisibleCount(PAGE_SIZE);
   };
@@ -200,7 +213,7 @@ export default function OrganizeHome() {
       searchResults.length !== unexpiredTotal ||
       storyName !== "" ||
       storyPeople !== "" ||
-      sortOrder !== "asc" ||
+      sortOrder !== "" ||
       storyTag.length > 0
     );
   }, [
@@ -212,6 +225,8 @@ export default function OrganizeHome() {
     sortOrder,
     storyTag,
   ]);
+
+  const showLoadMoreBtn = visibleCount < searchResults.length || hasMore;
 
   return (
     <>
@@ -353,7 +368,7 @@ export default function OrganizeHome() {
               </View>
 
               {/* 進階篩選抽屜 */}
-              {filterSec && (
+              {filterSec ? (
                 <View style={{ gap: 12, marginTop: 4 }}>
                   <MultipleSelectFunc
                     colorScheme={colorScheme}
@@ -395,17 +410,17 @@ export default function OrganizeHome() {
                     />
                   </View>
                 </View>
-              )}
+              ) : null}
 
               {/* 重置與清空篩選按鈕 */}
-              {isFilteredState && (
+              {isFilteredState ? (
                 <Btn
                   colorScheme={colorScheme}
                   font="重置並清空篩選"
                   func={handleClearSearch}
                   btnType={0}
                 />
-              )}
+              ) : null}
 
               {/* 滿版縱向列表 */}
               <View style={{ gap: 16, marginTop: 4, width: "100%" }}>
@@ -432,7 +447,8 @@ export default function OrganizeHome() {
                         colorScheme={colorScheme}
                       />
                     ))}
-                    {(hasMore || visibleCount < searchResults.length) && (
+
+                    {showLoadMoreBtn ? (
                       <Pressable
                         onPress={handleLoadMore}
                         disabled={loadingMore}
@@ -456,13 +472,11 @@ export default function OrganizeHome() {
                               color: "#FFA000",
                             }}
                           >
-                            查看更多（剩餘{" "}
-                            {Math.max(0, searchResults.length - visibleCount)}{" "}
-                            筆）
+                            載入更多
                           </Text>
                         )}
                       </Pressable>
-                    )}
+                    ) : null}
                   </>
                 )}
               </View>

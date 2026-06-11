@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, Pressable } from "react-native";
 
 import { Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,7 +9,7 @@ import Footer from "../../components/Footer";
 import { useUser } from "../../utils/userContext";
 import { useAppStyles } from "../../utils/useAppStyles";
 
-import { User } from "lucide-react-native";
+import { User, Bell } from "lucide-react-native";
 
 export default function Home() {
   const { styles, isLight } = useAppStyles();
@@ -17,7 +17,7 @@ export default function Home() {
   const { user, loading } = useUser();
   const data = [
     { btnName: "查找野團", route: "/subPage/OrganizeHome", id: "1" },
-    { btnName: "你的揪團", route: "/subPage/Home", id: "2" },
+    { btnName: "你的揪團", route: "/subPage/YourOrganize", id: "2" },
   ];
 
   return (
@@ -43,28 +43,61 @@ export default function Home() {
                 </Text>
                 <Text style={styles.content6}>查看今天的推理之旅</Text>
               </View>
-              {/* Profile */}
-              {user?.photoURL ? (
-                <Image
-                  source={{ uri: user.photoURL }}
-                  style={[styles.avatar, { maxWidth: 48, maxHeight: 48 }]}
-                />
-              ) : (
-                <View
-                  style={[styles.emptyAvatar, { maxWidth: 48, maxHeight: 48 }]}
+              {/* Nav */}
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <Pressable
+                  style={[
+                    styles.notifyIcon,
+                    { maxWidth: 48, maxHeight: 48, position: "relative" },
+                  ]}
                 >
-                  <User
+                  <Bell
                     color={isLight ? "#000" : "#fff"}
                     opacity={0.8}
                     size={24}
                   />
-                </View>
-              )}
+                  <View
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: 0,
+                      width: 18,
+                      height: 18,
+                      backgroundColor: "#ff3131",
+                      borderRadius: 9,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: 600 }}>1</Text>
+                  </View>
+                </Pressable>
+                {/* Profile */}
+                {user?.photoURL ? (
+                  <Image
+                    source={{ uri: user.photoURL }}
+                    style={[styles.avatar, { maxWidth: 48, maxHeight: 48 }]}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.emptyAvatar,
+                      { maxWidth: 48, maxHeight: 48 },
+                    ]}
+                  >
+                    <User
+                      color={isLight ? "#000" : "#fff"}
+                      opacity={0.8}
+                      size={24}
+                    />
+                  </View>
+                )}
+              </View>
             </View>
             {/* Weekly */}
             <Weekly />
             {/* Payment */}
-            <Payment />
+            {/* <Payment /> */}
             {/* Other */}
             <View
               style={{

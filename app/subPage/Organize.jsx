@@ -25,16 +25,21 @@ import LottieView from "lottie-react-native";
 import { useAppStyles } from "../../utils/useAppStyles";
 import { useUser } from "../../utils/userContext";
 import Footer from "../../components/Footer";
-import { subscribeUserData, createGroupEvent } from "../../utils/authService"; // 確保引入 createGroupEvent
-import { Calendar } from "react-native-calendars";
+import { subscribeUserData, createGroupEvent } from "../../utils/authService";
+import { Calendar, CalendarList } from "react-native-calendars";
 import SelectFunc from "../../components/SelectFun";
 import { stories } from "../../utils/story";
 
 export default function Organize() {
   const { styles, isLight, colorScheme } = useAppStyles();
   const { user, setUser } = useUser();
+
+  // 從路由取得參數
   const paramsData = useLocalSearchParams() || {};
   const { id } = paramsData;
+
+  const displayBtn = paramsData.displayBtn !== "false";
+
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -206,14 +211,14 @@ export default function Organize() {
       }
     }
   };
-  /*
+
   const maxDate = new Date();
   maxDate.setMonth(maxDate.getMonth() + 2);
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShowDatePicker(Platform.OS === "ios");
     setDate(currentDate);
-  };*/
+  };
 
   // 錯誤訊息驗證
   const validate = () => {
@@ -554,6 +559,7 @@ export default function Organize() {
                   onPress={handleOrganizeGroup}
                   disabled={loading}
                   style={({ pressed }) => ({
+                    display: displayBtn ? "flex" : "none",
                     justifyContent: "center",
                     alignItems: "center",
                     padding: 8,

@@ -1,24 +1,25 @@
 import React from "react";
-import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import { View, Text, Image, Pressable, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { Calendar, Users } from "lucide-react-native";
 import { stories } from "../utils/story";
+import { deleteGroup } from "../utils/authService";
 
 const getStoryCover = (storyId) => {
   const story = stories.find((s) => s.id === storyId);
   return story ? story.cover : null;
 };
 
-/* ────────────────────────────────────────────────────────
-   1. 最近揪團 - 橫向滑動卡片 (RecentGroupCard)
-   ──────────────────────────────────────────────────────── */
+// 1. 橫向滑動卡片 (RecentGroupCard)
 export function RecentGroupCard({ group, colorScheme, isLight }) {
   const coverImage = getStoryCover(group.storyId);
   const otherPeopleCount = Math.max(0, (group.currentPeople || 1) - 1);
 
   return (
     <Pressable
-      onPress={() => router.push(`/subPage/GroupDetail?id=${group.id}`)}
+      onPress={() =>
+        router.push(`/subPage/GroupDetail?id=${group.id}&showJoinBtn=true`)
+      }
       style={[
         styles.recentCard,
         { backgroundColor: isLight ? "#FFFFFF" : "#1E1E1E" },
@@ -46,7 +47,6 @@ export function RecentGroupCard({ group, colorScheme, isLight }) {
         </View>
 
         <View style={styles.avatarRow}>
-          {/* 修正點 3：添加預設頭像佔位樣式，防範未上傳圖片時出現的破圖 */}
           <View style={[styles.avatarWrapper, { backgroundColor: "#ccc" }]}>
             {group.hostPhotoURL ? (
               <Image
@@ -66,16 +66,23 @@ export function RecentGroupCard({ group, colorScheme, isLight }) {
   );
 }
 
-/* ────────────────────────────────────────────────────────
-   2. 劇本查詢 - 滿版縱向卡片 (GroupListCard)
-   ──────────────────────────────────────────────────────── */
-export function GroupListCard({ group, colorScheme, isLight }) {
+// 2. 滿版縱向卡片 (GroupListCard)
+export function GroupListCard({
+  group,
+  colorScheme,
+  isLight,
+  displayBtn = true,
+}) {
   const coverImage = getStoryCover(group.storyId);
   const otherPeopleCount = Math.max(0, (group.currentPeople || 1) - 1);
 
   return (
     <Pressable
-      onPress={() => router.push(`/subPage/GroupDetail?id=${group.id}`)}
+      onPress={() =>
+        router.push(
+          `/subPage/GroupDetail?id=${group.id}&showJoinBtn=${displayBtn}`,
+        )
+      }
       style={[
         styles.listCard,
         { backgroundColor: isLight ? "#FFFFFF" : "#1E1E1E" },
@@ -131,11 +138,86 @@ export function GroupListCard({ group, colorScheme, isLight }) {
   );
 }
 
+// 3. 你的揪團狀態卡片 (MyGroupCard)
+export function MyGroupCard({ group, colorScheme, isLight, onRefresh }) {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const isFull = group.neededPeople <= 0;
+  const isExpired = !isFull && group.endDate < todayStr;
+
+  const story = stories.find((s) => s.id === group.storyId) || {};
+
+  const handleDelete = () => {
+    Alert.alert(
+      "刪除揪團",
+      "確定要刪除這個已過期的揪團嗎？刪除後列表將同步更新。",
+      [
+        { text: "取消", style: "cancel" },
+        {
+          text: "確認刪除",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteGroup(group.id);
+              if (onRefresh) onRefresh();
+            } catch (error) {
+              Alert.alert("錯誤", "刪除失敗");
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const goReservation = () => {
+    router.push({
+      pathname: "/subPage/Reservation",
+      params: {
+        title: story.title || "未知劇本",
+        hour: story.time || "4",
+        people: Array.isArray(story.people)
+          ? story.people.join("-")
+          : story.people,
+        price: story.price?.toString() || "0",
+      },
+    });
+  };
+
+  return (
+    <View style={{ position: "relative", marginBottom: 16 }}>
+      <GroupListCard
+        group={group}
+        colorScheme={colorScheme}
+        isLight={isLight}
+        displayBtn={false}
+      />
+      {!!isFull && (
+        <View style={styles.overlayContainer}>
+          <Text style={styles.overlayText}>揪團已滿</Text>
+          <Pressable style={styles.overlayBtn} onPress={goReservation}>
+            <Text style={styles.overlayBtnText}>前往預約</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {!!isExpired && (
+        <Pressable style={styles.overlayContainer} onPress={handleDelete}>
+          <Text style={styles.overlayText}>揪團已過期</Text>
+          <Text
+            style={[styles.overlayBtnText, { marginTop: 8, color: "#ff8c8c" }]}
+          >
+            點擊卡片以刪除此紀錄
+          </Text>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   recentCard: {
     width: 160,
     borderRadius: 12,
-    marginRight: 14, // 透過右邊距控制橫向卡片彼此的間隔
+    marginRight: 14,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
@@ -218,6 +300,7 @@ const styles = StyleSheet.create({
   avatarPlaceholder: {
     width: "100%",
     height: "100%",
+    backgroundColor: "#ccc",
   },
   plusBadge: {
     width: 26,
@@ -228,7 +311,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1.5,
     borderColor: "#fff",
-    marginLeft: -6, // 頭像些微疊加效果
+    marginLeft: -6,
     zIndex: 1,
   },
   plusText: {
@@ -244,5 +327,30 @@ const styles = StyleSheet.create({
   lackPeopleText: {
     fontSize: 12,
     color: "#ff3131",
+  },
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  overlayText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  overlayBtn: {
+    backgroundColor: "#FFA000",
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  overlayBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
