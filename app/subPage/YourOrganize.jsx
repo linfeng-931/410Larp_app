@@ -14,6 +14,7 @@ import { useAppStyles } from "../../utils/useAppStyles";
 import { ChevronLeft, ClipboardList } from "lucide-react-native";
 import { subscribeMyOrganizedGroups } from "../../utils/authService";
 import { MyGroupCard } from "../../components/OrganizeCard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function YourOrganize() {
   const { styles, isLight, colorScheme } = useAppStyles();
@@ -24,23 +25,51 @@ export default function YourOrganize() {
   const [hiddenGroupIds, setHiddenGroupIds] = useState([]);
 
   useEffect(() => {
-    if (!user) return;
+    const loadHiddenGroups = async () => {
+      if (!user?.uid) return;
+      try {
+        const storedHiddenIds = await AsyncStorage.getItem(
+          `hiddenGroups_${user.uid}`,
+        );
+        if (storedHiddenIds) {
+          setHiddenGroupIds(JSON.parse(storedHiddenIds));
+        }
+      } catch (error) {
+        console.error("讀取本地隱藏揪團紀錄失敗:", error);
+      }
+    };
+
+    loadHiddenGroups();
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (!user?.uid) return;
     setLoading(true);
 
     const unsubscribe = subscribeMyOrganizedGroups(user.uid, (data) => {
-      setMyGroups(data);
+      setMyGroups(data || []);
       setLoading(false);
     });
-
     return () => unsubscribe();
-  }, [user]);
+  }, [user?.uid]);
 
   const totalPending = myGroups.reduce((acc, curr) => {
     return acc + (curr.pendingApprovals ? curr.pendingApprovals.length : 0);
   }, 0);
 
-  const handleHideGroup = (groupId) => {
-    setHiddenGroupIds((prev) => [...prev, groupId]);
+  const handleHideGroup = async (groupId) => {
+    if (!user?.uid) return;
+
+    try {
+      const updatedIds = [...hiddenGroupIds, groupId];
+      setHiddenGroupIds(updatedIds);
+      await AsyncStorage.setItem(
+        `hiddenGroups_${user.uid}`,
+        JSON.stringify(updatedIds),
+      );
+    } catch (error) {
+      console.error("同步隱藏紀錄至本地失敗:", error);
+    }
   };
 
   const visibleGroups = myGroups.filter(

@@ -151,20 +151,16 @@ export function MyGroupCard({
   const { user } = useUser(); // 取得當前登入使用者的預約資料
   const todayStr = new Date().toISOString().split("T")[0];
 
-  // 判定揪團是否已滿或過期
   const isFull = group.neededPeople <= 0;
   const isExpired = !isFull && group.endDate < todayStr;
   const story = stories.find((s) => s.id === group.storyId) || {};
 
-  // 動態判定此揪團劇本在當天是否已有成功預約紀錄
   const isCompletedReservation = useMemo(() => {
     if (!user?.appointments || !group.title) return false;
 
-    // 清除前後空格與特殊隱形字元
     const cleanGroupTitle = group.title.trim().replace(/\s+/g, "");
     const cleanGroupDate = group.startDate ? group.startDate.trim() : "";
 
-    // 開啟這行可以在控制台看目前的比對狀況
     console.log(`正在比對揪團: ${cleanGroupTitle} (${cleanGroupDate})`);
 
     return user.appointments.some((appt) => {
@@ -173,7 +169,6 @@ export function MyGroupCard({
         : "";
       const cleanApptDate = appt.date ? appt.date.trim() : "";
 
-      // 比對條件：日期必須相同，且預約名稱必須包含或等於揪團名稱
       const isTitleMatch =
         cleanApptTitle === cleanGroupTitle ||
         cleanApptTitle.includes(cleanGroupTitle) ||
@@ -237,7 +232,6 @@ export function MyGroupCard({
         displayBtn={false}
       />
 
-      {/* 互斥顯示邏輯：只要預約成功優先顯示「已完成預約」，否則才看是否滿人 */}
       {isCompletedReservation ? (
         <View style={styles.overlayContainer}>
           <Text style={styles.overlayText}>已完成預約</Text>

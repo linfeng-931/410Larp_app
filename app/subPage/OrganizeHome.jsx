@@ -7,6 +7,7 @@ import {
   Platform,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -72,9 +73,31 @@ export default function OrganizeHome() {
         const data = fetchedGroups || [];
         setAllGroups(data);
 
-        const unexpiredData = data.filter(
-          (g) => g.endDate >= todayStr && g.neededPeople > 0,
-        );
+        const bookedSet = new Set();
+        if (user && user?.appointments) {
+          user?.appointments.forEach((appt) => {
+            if (appt.date && appt.title) {
+              const cleanTitle = appt.title.trim().replace(/\s+/g, "");
+              bookedSet.add(`${appt.date.trim()}_${cleanTitle}`);
+            }
+          });
+        }
+
+        const unexpiredData = data.filter((g) => {
+          const isAvailable = g.endDate >= todayStr && g.neededPeople > 0;
+          if (!isAvailable) return false;
+
+          if (user && g.title) {
+            const cleanGroupTitle = g.title.trim().replace(/\s+/g, "");
+            const groupKey = `${g.startDate ? g.startDate.trim() : ""}_${cleanGroupTitle}`;
+            if (bookedSet.has(groupKey)) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+
         unexpiredData.sort(
           (a, b) => new Date(a.startDate) - new Date(b.startDate),
         );
@@ -88,8 +111,9 @@ export default function OrganizeHome() {
         setDbLoading(false);
       }
     };
+
     loadInitialData();
-  }, [todayStr]);
+  }, [todayStr, user]);
 
   const recentGroups = useMemo(() => {
     return [...allGroups]
@@ -258,7 +282,19 @@ export default function OrganizeHome() {
                 <Text style={[styles.title, { textAlign: "center" }]}>
                   野團一覽
                 </Text>
-                <Pressable onPress={() => router.push("/subPage/Organize")}>
+                <Pressable
+                  onPress={() => {
+                    if (user == null) {
+                      Alert.alert("提示", "請先註冊或登入", [
+                        {
+                          text: "確定",
+                          onPress: () => router.push("/subPage/LogIn"),
+                        },
+                      ]);
+                      return;
+                    } else router.push("/subPage/Organize");
+                  }}
+                >
                   <Plus
                     color={isLight ? "#000" : "#fff"}
                     opacity={0.8}
