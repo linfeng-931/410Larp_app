@@ -32,6 +32,7 @@ import {
   deleteField,
 } from "firebase/firestore";
 import { savePassword, getPassword } from "./secureStorage";
+import { generateOrderId } from "./orderSequence";
 
 export const checkSignUp = async (email, password, extraData) => {
   try {
@@ -240,7 +241,9 @@ export const checkCreateReservation = async (bookingData) => {
     otherRequire,
     people,
     address,
+    storyId
   } = bookingData;
+  const currentUser = auth.currentUser;
 
   const [h, m] = time.split(":").map(Number);
   const startTimeValue = h + m / 60;
@@ -252,6 +255,7 @@ export const checkCreateReservation = async (bookingData) => {
 
   const slotRef = doc(db, "bookings", slotId);
   const userRef = doc(db, "users", userId);
+  const newDisplayOrderId = generateOrderId(date, storyId);
 
   try {
     await runTransaction(db, async (transaction) => {
@@ -260,10 +264,20 @@ export const checkCreateReservation = async (bookingData) => {
         throw new Error("occupied");
       }
 
+      const userSnap = await transaction.get(userRef);
+      const userData = userSnap.exists() ? userSnap.data() : {};
+
+      const finalUserName = userName || userData.name || currentUser?.displayName || "未提供名稱";
+      const finalUserPhone = userData.phone || currentUser?.phoneNumber || "未提供電話";
+      const finalUserEmail = userData.email || currentUser?.email || "未提供信箱";
+
       transaction.set(slotRef, {
         status: "booked",
+        orderId: newDisplayOrderId,
         userId: userId,
-        userName: userName,
+        userName: finalUserName,
+        userEmail: finalUserEmail,
+        userPhone: finalUserPhone,
         originPrice: originPrice,
         totalPrice: totalPrice,
         createdAt: serverTimestamp(),
@@ -272,15 +286,15 @@ export const checkCreateReservation = async (bookingData) => {
         title: title,
         people: people,
         address: address,
-        hostName: hostName,
-        otherRequire: otherRequire,
+        hostName: hostName || "",
+        otherRequire: otherRequire || "",
         startTimeValue,
-        endTimeValue,
+        endTimeValue
       });
 
       transaction.update(userRef, {
         appointments: arrayUnion({
-          bookingId: slotId,
+          bookingId: newDisplayOrderId,
           date: date,
           time: time,
           title: title,
@@ -289,11 +303,36 @@ export const checkCreateReservation = async (bookingData) => {
           startTimeValue,
           endTimeValue,
           bookedAt: new Date().toISOString(),
+          status: "已付款", 
+          totalPrice: totalPrice,
+          hostName: hostName || "",
+          otherRequire: otherRequire || "",
+          userName: finalUserName,
+          userEmail: finalUserEmail,
+          userPhone: finalUserPhone
         }),
       });
     });
     return { success: true };
   } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchUserAppointments = async (userId) => {
+  if (!userId) throw new Error("缺少使用者 ID");
+
+  try {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      return userData.appointments || []; 
+    }
+    return [];
+  } catch (error) {
+    console.error("讀取預約紀錄失敗:", error);
     throw error;
   }
 };
@@ -473,7 +512,6 @@ export const joinGroupEvent = async (groupId, userId) => {
   }
 };
 
-// 修正：補齊了原本因結構斷裂而缺失的 } 括號
 export const fetchUserChatRooms = async (chatRoomIds) => {
   if (!chatRoomIds || chatRoomIds.length === 0) return [];
 

@@ -118,6 +118,7 @@ export default function AnItem() {
                 router.push({
                   pathname: "/subPage/Reservation",
                   params: {
+                    id: story.id,
                     title: story.title || "未知劇本",
                     hour: story.time || "4",
                     people: Array.isArray(story.people)

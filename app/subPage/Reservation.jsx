@@ -39,7 +39,7 @@ import { subscribeUserData } from "../../utils/authService";
 export default function Reservation() {
   const { styles, isLight } = useAppStyles();
   const { user, setUser } = useUser();
-  const { title, people, price, hour } = useLocalSearchParams();
+  const { id, title, people, price, hour } = useLocalSearchParams();
 
   const scrollRef = useRef(null);
 
@@ -182,19 +182,26 @@ export default function Reservation() {
   // 處理預約
   const handleNextStep = () => {
     if (validate()) {
+      const safePrice = Number(price) || 0;
+      const safePeople = Number(people) || 0;
+      
+      const calculatedTotalPrice = selectHost
+        ? (safePrice * safePeople) + 200
+        : (safePrice * safePeople);
+
       router.push({
         pathname: "/subPage/CheckReservation",
         params: {
           data: JSON.stringify({
             ...formData,
+            selectHost: selectHost,
             date: formatDate(date),
             time: timeSelect,
+            storyId: id,
             title: title,
             people: people,
-            originPrice: Number(price),
-            totalPrice: formData.selectHost
-              ? Number(price) * people + 200
-              : Number(price) * people,
+            originPrice: safePrice,
+            totalPrice: calculatedTotalPrice,
             duration: durationNum,
           }),
         },
