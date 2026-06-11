@@ -276,7 +276,7 @@ export default function AnRoom() {
                             disabled={sending || !inputText.trim()}
                         >
                             <View style={{
-                                backgroundColor: (sending || !inputText.trim()) ? '#ffe8bfff' : '#FFA000',
+                                backgroundColor: (sending || !inputText.trim()) ? '#ffa2004b' : '#FFA000',
                                 borderRadius: 100,
                                 height: 45,
                                 width: 45,
