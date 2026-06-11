@@ -3,15 +3,14 @@ import {
     Text,
     FlatList,
     TextInput,
-    Button,
     KeyboardAvoidingView,
     Platform,
     Pressable,
     ActivityIndicator,
     Image
 } from "react-native";
-import { useLocalSearchParams, Stack, useRouter } from "expo-router";
-import { useRef, useState, useEffect, useFocusEffect } from "react";
+import { useLocalSearchParams, Stack, useFocusEffect } from "expo-router";
+import { useRef, useState, useEffect, useCallback} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../firebase";
 import LottieView from 'lottie-react-native';
@@ -29,7 +28,6 @@ export default function AnRoom() {
     const [loading, setLoading] = useState(true);
 
     const { id, name } = useLocalSearchParams();
-    const router = useRouter();
 
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
@@ -41,7 +39,7 @@ export default function AnRoom() {
     const [error, setError] = useState(null);
 
     const currentUser = auth.currentUser;
-    
+
     // 監聽聊天室訊息變動
     useEffect(() => {
         if (!id) return;
@@ -91,18 +89,39 @@ export default function AnRoom() {
         getMembersData();
     }, [id]);
 
-    useEffect(() => {
-        return () => {
-            if (id && currentUser?.uid) {
-                console.log("使用者離開聊天室，更新最後讀取時間:", id);
-                updateRoomLastRead(currentUser.uid, id).catch((err) => {
-                    console.error("離開時更新讀取時間失敗:", err);
-                });
-            }
-        };
-    }, [id, currentUser?.uid]);
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                if (id && currentUser?.uid) {
+                    console.log("使用者離開聊天室，更新最後讀取時間:", id);
+                    updateRoomLastRead(currentUser.uid, id).catch((err) => {
+                        console.error("離開時更新讀取時間失敗:", err);
+                    });
+                }
+            };
+        }, [id, currentUser?.uid])
+    );
 
-    if (loading) return <Text>載入成員中...</Text>;
+    if (loading) {
+        return (
+            <SafeAreaView style={[styles.safeArea, {
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: isLight ? '#fff' : '#121212'
+            }]}>
+                <Stack.Screen options={{ headerShown: false }} />
+                <ActivityIndicator size="large" color="#FFA000" />
+                <Text style={{
+                    marginTop: 12,
+                    color: isLight ? '#999' : '#888',
+                    fontSize: 14
+                }}>
+                    載入成員中...
+                </Text>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={[styles.safeArea, { flex: 1 }]}>
@@ -186,7 +205,7 @@ export default function AnRoom() {
                                             backgroundColor: bubbleColor,
                                             paddingHorizontal: 16,
                                             paddingVertical: 12,
-                                            borderWidth: 1,
+                                            borderWidth: isLight ? 1 : 0,
                                             borderColor: '#dfdfdfff',
                                             zIndex: 2,
                                             borderTopLeftRadius: 18,

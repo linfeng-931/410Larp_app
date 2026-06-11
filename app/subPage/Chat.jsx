@@ -1,56 +1,29 @@
 import {
     View,
     Text,
-    Pressable,
     ScrollView,
     Platform,
     KeyboardAvoidingView,
 } from "react-native";
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import LottieView from "lottie-react-native";
 import Footer from "../../components/Footer";
 import { useAppStyles } from "../../utils/useAppStyles";
 import { useRef, useState, useEffect } from "react";
 import SearchFunc from "../../components/SearchFunc";
 import ChatRoomCard from "../../components/ChatRoomCard";
-import { useUser } from "../../utils/userContext";
 import { subscribeUserData, subscribeUserChatRooms } from "../../utils/authService";
-
+import { stories } from "../../utils/story"; // 💡 記得引入劇本資料庫，這樣搜尋才能比對名字
 
 export default function Chat() {
-    const { styles, isLight, colorScheme } = useAppStyles();
+    const { styles, colorScheme } = useAppStyles();
     const scrollRef = useRef(null);
+
     const [userProfile, setUserProfile] = useState(null);
-
-    const animationRef = useRef(null);
-    const loadingAnimation = require("../../assets/animation/Loading.json");
-    const [loading, setLoading] = useState(false);
-    const [pageStatus, SetPageStatus] = useState(0);
-    const [currentChat, SetCurrentChat] = useState([]);
     const [myChatRooms, setMyChatRooms] = useState([]);
+    
+    // 搜尋關鍵字
     const [chatRoomName, SetChatRoomName] = useState('');
-
-    // search
-    const ChatSearch = function (stories) {
-        const newStories = stories.filter(item => {
-            const matchName = chatRoomName !== '' ?
-                chatRoomName.split('').every(char =>
-                    item.title.toLowerCase().includes(char.toLowerCase()))
-                : true;
-            return matchName;
-        });
-
-        const isFilter = chatRoomName !== '';
-        if (isFilter) {
-            SetCurrentChat(newStories);
-            SetPageStatus(1);
-        }
-        else {
-            SetCurrentChat([]);
-            SetPageStatus(0);
-        }
-    };
 
     // -- 讀取所有聊天室 -- //
     useEffect(() => {
@@ -74,7 +47,6 @@ export default function Chat() {
         return () => unsubscribeRooms();
     }, [userProfile?.chatRooms]);
 
-    // 聊天室以時間排序
     const sortedChatRooms = [...myChatRooms].sort((a, b) => {
         const lastMsgA = a.message?.at(-1);
         const timeA = lastMsgA?.time?.toMillis ? lastMsgA.time.toMillis() : 0;
@@ -83,6 +55,13 @@ export default function Chat() {
         const timeB = lastMsgB?.time?.toMillis ? lastMsgB.time.toMillis() : 0;
 
         return timeB - timeA;
+    });
+
+    const filteredChatRooms = sortedChatRooms.filter((room) => {
+        if (!chatRoomName || chatRoomName.trim() === '') return true;
+        const foundStory = stories.find(item => item.id === room.storyID);
+        const targetTitle = foundStory ? foundStory.title : "未知劇本";
+        return targetTitle.toLowerCase().includes(chatRoomName.toLowerCase());
     });
 
     return (
@@ -103,9 +82,15 @@ export default function Chat() {
                         <View style={{ width: '100%', gap: 24 }}>
                             <Text style={[styles.title, { width: '100%', paddingHorizontal: 32 }]}>聊天室</Text>
                             <View style={{ width: '100%', paddingHorizontal: 32 }}>
-                                <SearchFunc colorScheme={colorScheme} value={chatRoomName} onValueChange={SetChatRoomName} defaultValue={'聊天室名稱'} />
+                                <SearchFunc 
+                                    colorScheme={colorScheme} 
+                                    value={chatRoomName} 
+                                    onValueChange={SetChatRoomName} 
+                                    defaultValue={'搜尋聊天室名稱...'} 
+                                />
                             </View>
                         </View>
+
                         <View
                             style={{
                                 width: "100%",
@@ -113,12 +98,15 @@ export default function Chat() {
                                 gap: 24,
                             }}
                         >
-                            {sortedChatRooms.length > 0 ? (
-                                sortedChatRooms.map((room) => (
+
+                            {filteredChatRooms.length > 0 ? (
+                                filteredChatRooms.map((room) => (
                                     <ChatRoomCard room={room} key={room.id} userProfile={userProfile} />
                                 ))
                             ) : (
-                                <Text style={[styles.content4, { textAlign: 'center', justifyContent: 'center' }]}>目前無聊天室</Text>
+                                <Text style={[styles.content4, { textAlign: 'center', justifyContent: 'center' }]}>
+                                    {chatRoomName ? "找不到符合的聊天室名稱" : "目前無聊天室"}
+                                </Text>
                             )}
                         </View>
                         <View style={{ height: 48 }} />

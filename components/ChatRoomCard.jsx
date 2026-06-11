@@ -14,6 +14,7 @@ import { stories } from "../utils/story";
 import { useRouter } from "expo-router";
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { auth } from "../firebase";
+import { useState, useEffect } from "react";
 
 export default function ChatRoomCard({ room, userProfile }) {
     const { styles, isLight } = useAppStyles();
@@ -26,13 +27,24 @@ export default function ChatRoomCard({ room, userProfile }) {
         : 0;
 
     // 計算未讀數量
+    const [forceZero, setForceZero] = useState(false);
+
+    useEffect(() => {
+        setForceZero(false);
+    }, [room.message?.length]);
+
     let unreadCount = 0;
-    if (room.message && Array.isArray(room.message)) {
+    if (room.message && Array.isArray(room.message) && !forceZero) {
         unreadCount = room.message.filter((msg) => {
             const msgTime = msg.time?.toMillis ? msg.time.toMillis() : 0;
             return msgTime > userLastReadTime;
         }).length;
     }
+
+    const handlePressRoom = () => {
+        setForceZero(true);
+        router.push(`/room/${room.id}?name=${encodeURIComponent(chatRoomName)}`);
+    };
 
     const currentStoryId = room.storyID;
     const foundStory = stories.find(item => item.id === currentStoryId);
@@ -60,8 +72,6 @@ export default function ChatRoomCard({ room, userProfile }) {
                     onPress: async () => {
                         try {
                             await leaveChatRoom(roomId, currentUser.uid);
-                            // 💡 刪除成功後，Firebase 的 onSnapshot 會自動監聽到資料改變，
-                            // 你的聊天室列表畫面就會瞬間「自動消失」這筆資料，不需要手動重整！
                         } catch (error) {
                             Alert.alert("刪除失敗", "發生錯誤，請稍後再試。");
                         }
@@ -71,7 +81,7 @@ export default function ChatRoomCard({ room, userProfile }) {
         );
     };
 
-    // 渲染滑動後露出的刪除按鈕
+    // 刪除按鈕
     const renderRightActions = (progress, dragX, roomId) => {
         const scale = dragX.interpolate({
             inputRange: [-80, 0],
@@ -122,9 +132,7 @@ export default function ChatRoomCard({ room, userProfile }) {
                         opacity: pressed ? 0.5 : 1,
                     }
                 ]}
-                onPress={() => {
-                    router.push(`/room/${room.id}?name=${encodeURIComponent(chatRoomName)}`);
-                }}
+                onPress={handlePressRoom}
             >
                 <View style={{ flexDirection: 'row', gap: 32 }}>
                     {chatRoomImg ? (
