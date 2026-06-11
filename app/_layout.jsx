@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { UserProvider } from "../utils/userContext";
 import * as SplashScreen from "expo-splash-screen";
 import { ThemeProvider } from "../utils/useAppStyles";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from "expo-font";
 SplashScreen.preventAutoHideAsync();
 
@@ -21,29 +22,31 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ThemeProvider>
-      <UserProvider>
-        <KeyboardProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="subPage/LogIn" />
-            <Stack.Screen name="subPage/SignUp" />
-            <Stack.Screen name="subPage/Home" />
-            <Stack.Screen name="story/[id]" />
-            <Stack.Screen name="subPage/Library" />
-            <Stack.Screen name="subPage/myBook" />
-            <Stack.Screen name="subPage/Reservation" />
-            <Stack.Screen name="subPage/Organize" />
-            <Stack.Screen name="subPage/OrganizeComplete" />
-            <Stack.Screen name="subPage/OrganizeHome" />
-            <Stack.Screen name="subPage/Setting" />
-            <Stack.Screen name="subPage/AccountSetting" />
-            <Stack.Screen name="subPage/Chat" />
-            <Stack.Screen name="room/[id]" />
-          </Stack>
-          <StatusBar style="auto" />
-        </KeyboardProvider>
-      </UserProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <UserProvider>
+          <KeyboardProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="subPage/LogIn" />
+              <Stack.Screen name="subPage/SignUp" />
+              <Stack.Screen name="subPage/Home" />
+              <Stack.Screen name="story/[id]" />
+              <Stack.Screen name="subPage/Library" />
+              <Stack.Screen name="subPage/myBook" />
+              <Stack.Screen name="subPage/Reservation" />
+              <Stack.Screen name="subPage/Organize" />
+              <Stack.Screen name="subPage/OrganizeComplete" />
+              <Stack.Screen name="subPage/OrganizeHome" />
+              <Stack.Screen name="subPage/Setting" />
+              <Stack.Screen name="subPage/AccountSetting" />
+              <Stack.Screen name="subPage/Chat" />
+              <Stack.Screen name="room/[id]" />
+            </Stack>
+            <StatusBar style="auto" />
+          </KeyboardProvider>
+        </UserProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

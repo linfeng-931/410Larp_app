@@ -20,6 +20,7 @@ import {
   updateDoc,
   runTransaction,
   arrayUnion,
+  arrayRemove,
   onSnapshot,
   collection,
   query,
@@ -728,6 +729,32 @@ export const fetchChatRoomIdByGroupId = async (groupId) => {
     return roomDoc.id; 
   } catch (error) {
     console.error("fetchChatRoomIdByGroupId 發生錯誤:", error);
+    throw error;
+  }
+};
+
+export const leaveChatRoom = async (roomId, userId) => {
+  if (!roomId || !userId) {
+    throw new Error("缺少聊天室 ID 或使用者 ID");
+  }
+
+  try {
+    const batch = writeBatch(db);
+
+    const userRef = doc(db, "users", userId);
+    const roomRef = doc(db, "chatRooms", roomId);
+    batch.update(userRef, {
+      chatRooms: arrayRemove(roomId)
+    });
+
+    batch.update(roomRef, {
+      userId: arrayRemove(userId)
+    });
+
+    await batch.commit();
+    return { success: true };
+  } catch (error) {
+    console.error("刪除/退出聊天室失敗:", error);
     throw error;
   }
 };
