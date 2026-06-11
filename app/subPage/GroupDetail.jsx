@@ -131,12 +131,16 @@ export default function GroupDetail() {
 
     try {
       const targetChatRoomId = await fetchChatRoomIdByGroupId(id);
-      const roomTitle = storyData?.title || groupData?.title || "劇本揪團聊天室";
+      const roomTitle =
+        storyData?.title || groupData?.title || "劇本揪團聊天室";
 
-      const isAlreadyMember = userProfile?.chatRooms?.includes(targetChatRoomId);
+      const isAlreadyMember =
+        userProfile?.chatRooms?.includes(targetChatRoomId);
 
       if (isAlreadyMember) {
-        router.push(`/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`);
+        router.push(
+          `/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`,
+        );
       } else {
         try {
           await joinChatRoom(targetChatRoomId, user.uid);
@@ -145,9 +149,10 @@ export default function GroupDetail() {
             throw joinError;
           }
         }
-        router.push(`/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`);
+        router.push(
+          `/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`,
+        );
       }
-
     } catch (error) {
       console.error("進入聊天室失敗:", error);
       Alert.alert("進入失敗", error.message || "發生錯誤，請稍後再試。");

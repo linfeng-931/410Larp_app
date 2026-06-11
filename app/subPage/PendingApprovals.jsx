@@ -21,6 +21,7 @@ import {
 } from "../../utils/authService";
 import SelectFunc from "../../components/SelectFun";
 import Btn from "../../components/Btn";
+import { sendNotification } from "../../utils/authService";
 
 export default function PendingApprovals() {
   const { styles, isLight, colorScheme } = useAppStyles();
@@ -93,10 +94,32 @@ export default function PendingApprovals() {
     return storyName !== "" || sortOrder !== "";
   }, [storyName, sortOrder]);
 
-  const handleProcess = async (groupId, applicantId, isApproved) => {
+  const handleProcess = async (
+    groupId,
+    applicantId,
+    isApproved,
+    targetItem,
+  ) => {
     setProcessingId(applicantId);
     try {
       await processJoinRequest(groupId, applicantId, isApproved);
+      const targetTitle = targetItem?.groupTitle || "未知劇本";
+      if (isApproved) {
+        sendNotification(
+          applicantId,
+          "揪團審核通過",
+          `您申請加入的【${targetTitle}】野團已被房主核准！`,
+          "join_success",
+        );
+      } else {
+        sendNotification(
+          applicantId,
+          "揪團審核未通過",
+          `您申請加入的【${targetTitle}】野團已被房主駁回！`,
+          "join_fail",
+        );
+      }
+
       Alert.alert(
         "成功",
         isApproved ? "已同意該使用者加入！" : "已拒絕並刪除該申請！",
@@ -287,7 +310,12 @@ export default function PendingApprovals() {
                       <>
                         <Pressable
                           onPress={() =>
-                            handleProcess(item.groupId, item.applicantId, true)
+                            handleProcess(
+                              item.groupId,
+                              item.applicantId,
+                              true,
+                              item,
+                            )
                           }
                           style={{
                             backgroundColor: "#FFA000",
@@ -308,7 +336,12 @@ export default function PendingApprovals() {
                         </Pressable>
                         <Pressable
                           onPress={() =>
-                            handleProcess(item.groupId, item.applicantId, false)
+                            handleProcess(
+                              item.groupId,
+                              item.applicantId,
+                              true,
+                              item,
+                            )
                           }
                           style={{
                             backgroundColor: isLight ? "#e0e0e0" : "#333",

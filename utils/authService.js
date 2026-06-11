@@ -30,8 +30,36 @@ import {
   limit,
   startAfter,
   deleteField,
+  addDoc,
 } from "firebase/firestore";
 import { savePassword, getPassword } from "./secureStorage";
+
+/**
+ * @param {string} userId
+ * @param {string} title
+ * @param {string} message
+ * @param {string} type
+ */
+
+export const sendNotification = async (
+  userId,
+  title,
+  message,
+  type = "general",
+) => {
+  if (!userId) return;
+  try {
+    await addDoc(collection(db, "notifications"), {
+      userId,
+      title,
+      message,
+      type,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("發送通知失敗:", error);
+  }
+};
 
 export const checkSignUp = async (email, password, extraData) => {
   try {
@@ -63,6 +91,34 @@ export const checkSignUp = async (email, password, extraData) => {
 
     return user;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const subscribeMyNotifications = (userId, callback) => {
+  if (!userId) return () => {};
+  const notificationsRef = collection(db, "notifications");
+  const q = query(
+    notificationsRef,
+    where("userId", "==", userId),
+    orderBy("createdAt", "desc"),
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const list = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    callback(list);
+  });
+};
+
+export const deleteNotification = async (notificationId) => {
+  if (!notificationId) return;
+  try {
+    await deleteDoc(doc(db, "notifications", notificationId));
+  } catch (error) {
+    console.error("刪除通知失敗:", error);
     throw error;
   }
 };
@@ -743,14 +799,14 @@ export const joinChatRoom = async (chatRoomId, userId) => {
       const roomData = roomSnap.data();
       // 💡 修正這裡：如果已經在裡面，不要當作錯誤拋出，直接 return 中斷這次 Transaction 即可
       if (roomData.userId && roomData.userId.includes(userId)) {
-        return; 
+        return;
       }
 
       transaction.update(roomRef, {
-        userId: arrayUnion(userId)
+        userId: arrayUnion(userId),
       });
       transaction.update(userRef, {
-        chatRooms: arrayUnion(chatRoomId)
+        chatRooms: arrayUnion(chatRoomId),
       });
     });
 
