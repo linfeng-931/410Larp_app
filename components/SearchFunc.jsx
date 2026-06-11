@@ -3,7 +3,7 @@ import { Search } from "lucide-react-native";
 import { getStyles } from "../utils/styleFormat";
 import { useState } from "react";
 
-export default function SearchFunc({ colorScheme, value, onValueChange }) {
+export default function SearchFunc({ colorScheme, value, onValueChange, defaultValue }) {
   const styles = getStyles(colorScheme);
 
   return (
@@ -14,9 +14,9 @@ export default function SearchFunc({ colorScheme, value, onValueChange }) {
         onChangeText={(text) => {
           onValueChange(text);
         }}
-        placeholder="劇本名稱"
+        placeholder={defaultValue}
         placeholderTextColor={`${styles.content3.color}66`}
-        style={[styles.content1, { paddingVertical: 8, height: "100%" }]}
+        style={[styles.content1, { height: "100%" }]}
       />
     </View>
   );

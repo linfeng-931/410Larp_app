@@ -30,7 +30,9 @@ export default function Footer({ page }) {
             router.replace("/subPage/Home");
           }}
         >
-          <Home size={24} style={styles.iconBtnDisact} />
+          <View style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
+            <Home size={24} style={styles.iconBtnDisact} />
+          </View>
         </Pressable>
       )}
 
@@ -45,7 +47,9 @@ export default function Footer({ page }) {
             router.push("/subPage/Library");
           }}
         >
-          <LibraryBig style={styles.iconBtnDisact} size={24} />
+          <View style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
+            <LibraryBig style={styles.iconBtnDisact} size={24} />
+          </View>
         </Pressable>
       )}
 
@@ -56,8 +60,13 @@ export default function Footer({ page }) {
           style={({ pressed }) => ({
             opacity: pressed ? 0.5 : 1,
           })}
+          onPress={() => {
+            router.push("/subPage/Chat");
+          }}
         >
-          <MessageCircleMore size={24} style={styles.iconBtnDisact} />
+          <View style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
+            <MessageCircleMore size={24} style={styles.iconBtnDisact} />
+          </View>
         </Pressable>
       )}
       {page == 4 ? (
@@ -71,7 +80,9 @@ export default function Footer({ page }) {
             router.push("/subPage/Setting");
           }}
         >
-          <Settings size={24} style={styles.iconBtnDisact} />
+          <View style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
+            <Settings size={24} style={styles.iconBtnDisact} />
+          </View>
         </Pressable>
       )}
     </View>

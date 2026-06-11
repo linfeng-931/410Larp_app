@@ -132,7 +132,7 @@ export default function Library() {
 
             {/* 查詢功能 */}
             <View style={{ width: '100%', paddingHorizontal: 32, gap: 16, marginBottom: 32 }}>
-              <SearchFunc colorScheme={colorScheme} value={storyName} onValueChange={SetStoryName} />
+              <SearchFunc colorScheme={colorScheme} value={storyName} onValueChange={SetStoryName} defaultValue={'劇本名稱'}/>
               <MultipleSelectFunc colorScheme={colorScheme} value={storyTag} onValueChange={SetStoryTag} />
               <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ width: '47%' }}>
