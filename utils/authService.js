@@ -741,16 +741,16 @@ export const joinChatRoom = async (chatRoomId, userId) => {
       }
 
       const roomData = roomSnap.data();
+      // 💡 修正這裡：如果已經在裡面，不要當作錯誤拋出，直接 return 中斷這次 Transaction 即可
       if (roomData.userId && roomData.userId.includes(userId)) {
-        throw new Error("您已經在此聊天室中囉！");
+        return; 
       }
 
       transaction.update(roomRef, {
-        userId: arrayUnion(userId),
+        userId: arrayUnion(userId)
       });
-
       transaction.update(userRef, {
-        chatRooms: arrayUnion(chatRoomId),
+        chatRooms: arrayUnion(chatRoomId)
       });
     });
 

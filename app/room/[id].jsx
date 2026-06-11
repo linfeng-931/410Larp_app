@@ -14,11 +14,9 @@ import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import { useRef, useState, useEffect, useFocusEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../firebase";
-import { useCallback } from "react";
 import LottieView from 'lottie-react-native';
 import Header from "../../components/Header";
 import { useAppStyles } from "../../utils/useAppStyles";
-import { useUser } from "../../utils/userContext";
 import { SendHorizontal } from 'lucide-react-native';
 import { subscribeSingleChatRoom, sendChatMessage, formatMessageTime, fetchChatRoomMembersProfile, updateRoomLastRead } from "../../utils/authService";
 
@@ -94,12 +92,9 @@ export default function AnRoom() {
     }, [id]);
 
     useEffect(() => {
-        // 這裡故意留空，因為我們只在乎「離開」的那一刻
-        
         return () => {
             if (id && currentUser?.uid) {
                 console.log("使用者離開聊天室，更新最後讀取時間:", id);
-                // 在背景默默執行，不卡頁面銷毀
                 updateRoomLastRead(currentUser.uid, id).catch((err) => {
                     console.error("離開時更新讀取時間失敗:", err);
                 });

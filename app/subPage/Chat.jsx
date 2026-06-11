@@ -74,6 +74,17 @@ export default function Chat() {
         return () => unsubscribeRooms();
     }, [userProfile?.chatRooms]);
 
+    // 聊天室以時間排序
+    const sortedChatRooms = [...myChatRooms].sort((a, b) => {
+        const lastMsgA = a.message?.at(-1);
+        const timeA = lastMsgA?.time?.toMillis ? lastMsgA.time.toMillis() : 0;
+
+        const lastMsgB = b.message?.at(-1);
+        const timeB = lastMsgB?.time?.toMillis ? lastMsgB.time.toMillis() : 0;
+
+        return timeB - timeA;
+    });
+
     return (
         <>
             <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
@@ -102,12 +113,12 @@ export default function Chat() {
                                 gap: 24,
                             }}
                         >
-                            {myChatRooms.length > 0 ? (
-                                myChatRooms.map((room) => (
+                            {sortedChatRooms.length > 0 ? (
+                                sortedChatRooms.map((room) => (
                                     <ChatRoomCard room={room} key={room.id} userProfile={userProfile} />
                                 ))
                             ) : (
-                                <Text style={[styles.content4, {textAlign:'center', justifyContent:'center'}]}>目前無聊天室</Text>
+                                <Text style={[styles.content4, { textAlign: 'center', justifyContent: 'center' }]}>目前無聊天室</Text>
                             )}
                         </View>
                         <View style={{ height: 48 }} />

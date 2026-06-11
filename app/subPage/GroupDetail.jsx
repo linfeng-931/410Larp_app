@@ -34,7 +34,7 @@ export default function GroupDetail() {
   const paramsData = useLocalSearchParams() || {};
   const router = useRouter();
   const { styles, colorScheme } = useAppStyles();
-  const { user, isGuest } = useUser();
+  const { user, userProfile, isGuest } = useUser();
 
   const isJoinBtnVisible = paramsData.showJoinBtn !== "false";
 
@@ -120,6 +120,37 @@ export default function GroupDetail() {
           onPress: () => router.replace("/subPage/OrganizeHome"),
         },
       ]);
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  // 處理點擊進入聊天室
+  const handleJoinChatRoom = async () => {
+    setJoining(true);
+
+    try {
+      const targetChatRoomId = await fetchChatRoomIdByGroupId(id);
+      const roomTitle = storyData?.title || groupData?.title || "劇本揪團聊天室";
+
+      const isAlreadyMember = userProfile?.chatRooms?.includes(targetChatRoomId);
+
+      if (isAlreadyMember) {
+        router.push(`/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`);
+      } else {
+        try {
+          await joinChatRoom(targetChatRoomId, user.uid);
+        } catch (joinError) {
+          if (joinError.message !== "您已經在此聊天室中囉！") {
+            throw joinError;
+          }
+        }
+        router.push(`/room/${targetChatRoomId}?name=${encodeURIComponent(roomTitle)}`);
+      }
+
+    } catch (error) {
+      console.error("進入聊天室失敗:", error);
+      Alert.alert("進入失敗", error.message || "發生錯誤，請稍後再試。");
     } finally {
       setJoining(false);
     }
@@ -216,6 +247,20 @@ export default function GroupDetail() {
                   備註：{groupData.otherRequire || "無"}
                 </Text>
               </View>
+            </View>
+            <View
+              style={{
+                width: "100%",
+                marginBottom: 18,
+                display: isJoinBtnVisible ? "none" : "flex",
+              }}
+            >
+              <Btn
+                colorScheme={colorScheme}
+                font={joining ? "進入中..." : "進入聊天室"}
+                func={handleJoinChatRoom}
+                btnType={1}
+              />
             </View>
 
             {/* 劇本簡介 */}
