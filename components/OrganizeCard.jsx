@@ -4,6 +4,8 @@ import { router } from "expo-router";
 import { Calendar, Users } from "lucide-react-native";
 import { stories } from "../utils/story";
 import { deleteGroup } from "../utils/authService";
+import { useUser } from "../utils/userContext";
+import { useMemo } from "react";
 
 const getStoryCover = (storyId) => {
   const story = stories.find((s) => s.id === storyId);
@@ -139,12 +141,56 @@ export function GroupListCard({
 }
 
 // 3. 你的揪團狀態卡片 (MyGroupCard)
-export function MyGroupCard({ group, colorScheme, isLight, onRefresh }) {
+export function MyGroupCard({
+  group,
+  colorScheme,
+  isLight,
+  onRefresh,
+  onHide,
+}) {
+  const { user } = useUser(); // 取得當前登入使用者的預約資料
   const todayStr = new Date().toISOString().split("T")[0];
+
+  // 判定揪團是否已滿或過期
   const isFull = group.neededPeople <= 0;
   const isExpired = !isFull && group.endDate < todayStr;
-
   const story = stories.find((s) => s.id === group.storyId) || {};
+
+  // 動態判定此揪團劇本在當天是否已有成功預約紀錄
+  const isCompletedReservation = useMemo(() => {
+    if (!user?.appointments || !group.title) return false;
+
+    // 清除前後空格與特殊隱形字元
+    const cleanGroupTitle = group.title.trim().replace(/\s+/g, "");
+    const cleanGroupDate = group.startDate ? group.startDate.trim() : "";
+
+    // 開啟這行可以在控制台看目前的比對狀況
+    console.log(`正在比對揪團: ${cleanGroupTitle} (${cleanGroupDate})`);
+
+    return user.appointments.some((appt) => {
+      const cleanApptTitle = appt.title
+        ? appt.title.trim().replace(/\s+/g, "")
+        : "";
+      const cleanApptDate = appt.date ? appt.date.trim() : "";
+
+      // 比對條件：日期必須相同，且預約名稱必須包含或等於揪團名稱
+      const isTitleMatch =
+        cleanApptTitle === cleanGroupTitle ||
+        cleanApptTitle.includes(cleanGroupTitle) ||
+        cleanGroupTitle.includes(cleanApptTitle);
+      if (isTitleMatch)
+        console.log(cleanApptTitle, cleanGroupTitle, "完成預約");
+      else
+        console.log(
+          "cleanApptTitle : " +
+            cleanApptTitle +
+            "cleanGroupTitle : " +
+            cleanGroupTitle,
+        );
+
+      return isTitleMatch;
+    });
+  }, [user?.appointments, group.startDate, group.title]);
 
   const handleDelete = () => {
     Alert.alert(
@@ -172,7 +218,7 @@ export function MyGroupCard({ group, colorScheme, isLight, onRefresh }) {
     router.push({
       pathname: "/subPage/Reservation",
       params: {
-        title: story.title || "未知劇本",
+        title: story.title || group.title || "未知劇本",
         hour: story.time || "4",
         people: Array.isArray(story.people)
           ? story.people.join("-")
@@ -190,16 +236,32 @@ export function MyGroupCard({ group, colorScheme, isLight, onRefresh }) {
         isLight={isLight}
         displayBtn={false}
       />
-      {!!isFull && (
+
+      {/* 互斥顯示邏輯：只要預約成功優先顯示「已完成預約」，否則才看是否滿人 */}
+      {isCompletedReservation ? (
         <View style={styles.overlayContainer}>
-          <Text style={styles.overlayText}>揪團已滿</Text>
-          <Pressable style={styles.overlayBtn} onPress={goReservation}>
-            <Text style={styles.overlayBtnText}>前往預約</Text>
+          <Text style={styles.overlayText}>已完成預約</Text>
+          <Pressable
+            onPress={() => {
+              if (onHide) onHide(group.id); // 觸發純前端隱藏
+            }}
+            style={[styles.overlayBtn, { backgroundColor: "#ff8c8c" }]}
+          >
+            <Text style={styles.overlayBtnText}>點擊以移除此顯示</Text>
           </Pressable>
         </View>
+      ) : (
+        isFull && (
+          <View style={styles.overlayContainer}>
+            <Text style={styles.overlayText}>揪團已滿</Text>
+            <Pressable style={styles.overlayBtn} onPress={goReservation}>
+              <Text style={styles.overlayBtnText}>前往預約</Text>
+            </Pressable>
+          </View>
+        )
       )}
 
-      {!!isExpired && (
+      {isExpired && !isCompletedReservation && (
         <Pressable style={styles.overlayContainer} onPress={handleDelete}>
           <Text style={styles.overlayText}>揪團已過期</Text>
           <Text
