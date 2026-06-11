@@ -68,6 +68,7 @@ export default function CheckReservation() {
         duration: bookingInfo.duration,
         hostName: bookingInfo.hostName,
         otherRequire: bookingInfo.otherRequire,
+        storyId: bookingInfo.storyId,
       });
 
       Alert.alert("成功", "預約已完成！", [

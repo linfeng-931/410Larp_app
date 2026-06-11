@@ -137,7 +137,7 @@ export default function Setting() {
   ];
   const accountDetailLink = [
     "/subPage/AccountSetting",
-    "/subPage/PurchaseHistory",
+    "/subPage/ReservationHistory",
   ];
 
   const basicSetting = [
