@@ -428,32 +428,47 @@ export const joinGroupEvent = async (groupId, userId) => {
   const userRef = doc(db, "users", userId);
 
   try {
+    let resultType = "";
     await runTransaction(db, async (transaction) => {
       const groupSnap = await transaction.get(groupRef);
       if (!groupSnap.exists()) throw new Error("該揪團不存在或已關閉");
 
       const groupData = groupSnap.data();
-
       if (groupData.participants && groupData.participants.includes(userId)) {
-        throw new Error("您已經加入此揪團了！");
+        throw new Error("您已經是此揪團的成員囉！");
       }
 
-      if (!groupData.selectVerify) {
-        const currentJoined = (groupData.participants?.length || 1) - 1;
-        if (currentJoined >= groupData.neededPeople) {
-          throw new Error("此揪團人數已滿，無法加入！");
+      // 判斷是否需要審查
+      if (groupData.selectVerify) {
+        const pendingUsers = groupData.pendingApprovals || [];
+        if (pendingUsers.includes(userId)) {
+          throw new Error("您已送出過審查申請，請靜候團長回覆。");
         }
-      }
-      transaction.update(groupRef, {
-        participants: arrayUnion(userId),
-      });
+        transaction.update(groupRef, {
+          pendingApprovals: arrayUnion(userId),
+        });
+        resultType = "verify";
+      } else {
+        const remainingSlots = groupData.neededPeople || 0;
+        if (remainingSlots <= 0) {
+          throw new Error("非常抱歉！就在剛剛該揪團人數已滿！");
+        }
 
-      transaction.update(userRef, {
-        joinedGroups: arrayUnion(groupId),
-      });
+        const newNeededPeople = remainingSlots - 1;
+        transaction.update(groupRef, {
+          neededPeople: newNeededPeople,
+          participants: arrayUnion(userId),
+          status: newNeededPeople === 0 ? "filled" : "open", // 人數若歸零，直接改變狀態為 filled
+        });
+
+        transaction.update(userRef, {
+          joinedGroups: arrayUnion(groupId),
+        });
+        resultType = "direct";
+      }
     });
 
-    return { success: true };
+    return { success: true, type: resultType };
   } catch (error) {
     throw error;
   }

@@ -43,6 +43,7 @@ export default function OrganizeHome() {
   const [dbLoading, setDbLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const sectionLabelColor = isLight ? "#555" : "#aaa";
   const sectionTitleSize = 17;
@@ -71,9 +72,9 @@ export default function OrganizeHome() {
         const data = fetchedGroups || [];
 
         setAllGroups(data);
-
-        // 過濾未過期資料
-        const unexpiredData = data.filter((g) => g.endDate >= todayStr);
+        const unexpiredData = data.filter(
+          (g) => g.endDate >= todayStr && g.neededPeople > 0,
+        );
         unexpiredData.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
 
         setSearchResults(unexpiredData);
@@ -88,7 +89,6 @@ export default function OrganizeHome() {
     loadInitialData();
   }, [todayStr]);
 
-  // 計算即將截止揪團
   const recentGroups = useMemo(() => {
     return [...allGroups]
       .filter((g) => g.neededPeople > 0 && g.endDate >= todayStr)
@@ -108,9 +108,10 @@ export default function OrganizeHome() {
         const updatedAll = [...allGroups, ...data];
         setAllGroups(updatedAll);
 
-        let filtered = updatedAll.filter((g) => g.endDate >= todayStr);
+        let filtered = updatedAll.filter(
+          (g) => g.endDate >= todayStr && g.neededPeople > 0,
+        );
 
-        // 條件過濾
         if (storyName.trim()) {
           filtered = filtered.filter((g) =>
             g.title.toLowerCase().includes(storyName.toLowerCase()),
@@ -133,6 +134,9 @@ export default function OrganizeHome() {
         setLastDoc(lastVisible);
       }
 
+      // 增加目前顯示的數量
+      setVisibleCount((prev) => prev + PAGE_SIZE);
+
       if (data.length < 10) {
         setHasMore(false);
       }
@@ -145,7 +149,9 @@ export default function OrganizeHome() {
 
   // 搜尋過濾
   const handleSearch = () => {
-    let filtered = [...allGroups].filter((g) => g.endDate >= todayStr);
+    let filtered = [...allGroups].filter(
+      (g) => g.endDate >= todayStr && g.neededPeople > 0,
+    );
 
     if (storyName.trim()) {
       filtered = filtered.filter((g) =>
@@ -168,6 +174,7 @@ export default function OrganizeHome() {
     });
 
     setSearchResults(filtered);
+    setVisibleCount(PAGE_SIZE); // 搜尋時重置顯示數量
   };
 
   // 清空搜尋
@@ -177,14 +184,17 @@ export default function OrganizeHome() {
     setSortOrder("asc");
     setStoryTag([]);
 
-    const defaultData = allGroups.filter((g) => g.endDate >= todayStr);
+    const defaultData = allGroups.filter(
+      (g) => g.endDate >= todayStr && g.neededPeople > 0,
+    );
     defaultData.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
     setSearchResults(defaultData);
+    setVisibleCount(PAGE_SIZE);
   };
 
   const isFilteredState = useMemo(() => {
     const unexpiredTotal = allGroups.filter(
-      (g) => g.endDate >= todayStr,
+      (g) => g.endDate >= todayStr && g.neededPeople > 0,
     ).length;
     return (
       searchResults.length !== unexpiredTotal ||
@@ -414,7 +424,7 @@ export default function OrganizeHome() {
                   </Text>
                 ) : (
                   <>
-                    {searchResults.map((group) => (
+                    {searchResults.slice(0, visibleCount).map((group) => (
                       <GroupListCard
                         key={`list-${group.id}`}
                         group={group}
@@ -422,8 +432,7 @@ export default function OrganizeHome() {
                         colorScheme={colorScheme}
                       />
                     ))}
-
-                    {hasMore && (
+                    {(hasMore || visibleCount < searchResults.length) && (
                       <Pressable
                         onPress={handleLoadMore}
                         disabled={loadingMore}
@@ -447,7 +456,9 @@ export default function OrganizeHome() {
                               color: "#FFA000",
                             }}
                           >
-                            查看更多揪團
+                            查看更多（剩餘{" "}
+                            {Math.max(0, searchResults.length - visibleCount)}{" "}
+                            筆）
                           </Text>
                         )}
                       </Pressable>

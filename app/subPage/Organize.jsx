@@ -266,22 +266,8 @@ export default function Organize() {
 
         await createGroupEvent(groupData);
         setLoading(false);
-
-        // 成功彈跳視窗，按下確定後回首頁
-        Alert.alert(
-          "發起成功",
-          "您的揪團已成功建立！",
-          [
-            {
-              text: "確定",
-              onPress: () => {
-                router.dismissAll();
-                router.replace("/subPage/OrganizeComplete"); // 返回系統首頁
-              },
-            },
-          ],
-          { cancelable: false },
-        );
+        router.dismissAll();
+        router.replace("/subPage/OrganizeComplete");
       } catch (error) {
         setLoading(false);
         console.error("發起揪團失敗:", error);

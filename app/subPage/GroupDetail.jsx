@@ -45,7 +45,6 @@ export default function GroupDetail() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setGroupData(data);
-          // 透過揪團資料找尋本地端的劇本資源
           const sData = stories.find((s) => s.id === data.storyId);
           setStoryData(sData);
         } else {
@@ -73,20 +72,27 @@ export default function GroupDetail() {
 
     setJoining(true);
     try {
-      // 呼叫我們在 authService 寫好的核心邏輯
-      await joinGroupEvent(id, user.uid);
+      const result = await joinGroupEvent(id, user.uid);
 
-      Alert.alert(
-        "成功",
-        groupData.selectVerify
-          ? "已送出申請，請等待主辦審核！"
-          : "加入揪團成功！",
-        [
-          { text: "確定", onPress: () => router.replace("/") }, // 成功後返回首頁
-        ],
-      );
+      if (result.type === "verify") {
+        Alert.alert("申請成功", "已送出申請，請等待主辦審核！", [
+          {
+            text: "確定",
+            onPress: () => router.replace("/subPage/OrganizeHome"),
+          },
+        ]);
+      } else {
+        Alert.alert("加入成功", "恭喜您，直接加入揪團成功！", [
+          { text: "確定", onPress: () => router.replace("/subPage/Home") },
+        ]);
+      }
     } catch (error) {
-      Alert.alert("無法加入", error.message || "發生錯誤，請稍後再試。");
+      Alert.alert("加入失敗", error.message || "發生錯誤，請稍後再試。", [
+        {
+          text: "返回列表",
+          onPress: () => router.replace("/subPage/OrganizeHome"),
+        },
+      ]);
     } finally {
       setJoining(false);
     }
@@ -193,7 +199,6 @@ export default function GroupDetail() {
               </Text>
             </View>
 
-            {/* 參與揪團按鈕 */}
             <View style={{ width: "100%", marginTop: 16, marginBottom: 40 }}>
               <Btn
                 colorScheme={colorScheme}
