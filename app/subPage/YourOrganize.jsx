@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,7 +11,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Footer from "../../components/Footer";
 import { useUser } from "../../utils/userContext";
 import { useAppStyles } from "../../utils/useAppStyles";
-import { useState, useEffect } from "react";
 import { ChevronLeft, ClipboardList } from "lucide-react-native";
 import { subscribeMyOrganizedGroups } from "../../utils/authService";
 import { MyGroupCard } from "../../components/OrganizeCard";
@@ -20,6 +20,8 @@ export default function YourOrganize() {
   const { user } = useUser();
   const [myGroups, setMyGroups] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [hiddenGroupIds, setHiddenGroupIds] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -36,6 +38,14 @@ export default function YourOrganize() {
   const totalPending = myGroups.reduce((acc, curr) => {
     return acc + (curr.pendingApprovals ? curr.pendingApprovals.length : 0);
   }, 0);
+
+  const handleHideGroup = (groupId) => {
+    setHiddenGroupIds((prev) => [...prev, groupId]);
+  };
+
+  const visibleGroups = myGroups.filter(
+    (group) => !hiddenGroupIds.includes(group.id),
+  );
 
   return (
     <>
@@ -102,6 +112,7 @@ export default function YourOrganize() {
                     待審核清單
                   </Text>
                 </View>
+
                 {totalPending > 0 ? (
                   <View
                     style={{
@@ -138,19 +149,20 @@ export default function YourOrganize() {
                   color="#FFA000"
                   style={{ marginTop: 40 }}
                 />
-              ) : myGroups.length === 0 ? (
+              ) : visibleGroups.length === 0 ? (
                 <View style={{ alignItems: "center", paddingVertical: 40 }}>
                   <Text style={{ color: "#888" }}>
-                    你尚未發起過任何揪團喔！
+                    目前沒有發起中的揪團喔！
                   </Text>
                 </View>
               ) : (
-                myGroups.map((group) => (
+                visibleGroups.map((group) => (
                   <MyGroupCard
                     key={group.id}
                     group={group}
                     colorScheme={colorScheme}
                     isLight={isLight}
+                    onHide={handleHideGroup}
                   />
                 ))
               )}
