@@ -297,7 +297,7 @@ export const checkCreateReservation = async (bookingData) => {
     otherRequire,
     people,
     address,
-    storyId
+    storyId,
   } = bookingData;
   const currentUser = auth.currentUser;
 
@@ -323,9 +323,12 @@ export const checkCreateReservation = async (bookingData) => {
       const userSnap = await transaction.get(userRef);
       const userData = userSnap.exists() ? userSnap.data() : {};
 
-      const finalUserName = userName || userData.name || currentUser?.displayName || "未提供名稱";
-      const finalUserPhone = userData.phone || currentUser?.phoneNumber || "未提供電話";
-      const finalUserEmail = userData.email || currentUser?.email || "未提供信箱";
+      const finalUserName =
+        userName || userData.name || currentUser?.displayName || "未提供名稱";
+      const finalUserPhone =
+        userData.phone || currentUser?.phoneNumber || "未提供電話";
+      const finalUserEmail =
+        userData.email || currentUser?.email || "未提供信箱";
 
       transaction.set(slotRef, {
         status: "booked",
@@ -345,7 +348,7 @@ export const checkCreateReservation = async (bookingData) => {
         hostName: hostName || "",
         otherRequire: otherRequire || "",
         startTimeValue,
-        endTimeValue
+        endTimeValue,
       });
 
       transaction.update(userRef, {
@@ -359,13 +362,13 @@ export const checkCreateReservation = async (bookingData) => {
           startTimeValue,
           endTimeValue,
           bookedAt: new Date().toISOString(),
-          status: "已付款", 
+          status: "已付款",
           totalPrice: totalPrice,
           hostName: hostName || "",
           otherRequire: otherRequire || "",
           userName: finalUserName,
           userEmail: finalUserEmail,
-          userPhone: finalUserPhone
+          userPhone: finalUserPhone,
         }),
       });
     });
@@ -384,7 +387,7 @@ export const fetchUserAppointments = async (userId) => {
 
     if (userSnap.exists()) {
       const userData = userSnap.data();
-      return userData.appointments || []; 
+      return userData.appointments || [];
     }
     return [];
   } catch (error) {

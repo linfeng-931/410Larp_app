@@ -93,7 +93,7 @@ export default function YourOrganize() {
                 flexDirection: "row",
               }}
             >
-              <Pressable onPress={() => router.back()}>
+              <Pressable onPress={() => router.push("/subPage/Home")}>
                 <ChevronLeft size={24} style={styles.cardIcon} />
               </Pressable>
               <Text style={[styles.title, { textAlign: "center" }]}>

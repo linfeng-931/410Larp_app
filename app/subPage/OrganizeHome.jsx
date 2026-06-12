@@ -213,7 +213,6 @@ export default function OrganizeHome() {
     setVisibleCount(PAGE_SIZE);
   };
 
-  // 4. 清空
   const handleClearSearch = () => {
     setStoryName("");
     setStoryPeople("");
@@ -406,11 +405,6 @@ export default function OrganizeHome() {
               {/* 進階篩選抽屜 */}
               {filterSec ? (
                 <View style={{ gap: 12, marginTop: 4 }}>
-                  <MultipleSelectFunc
-                    colorScheme={colorScheme}
-                    value={storyTag}
-                    onValueChange={setStoryTag}
-                  />
                   <View
                     style={{
                       flexDirection: "row",
