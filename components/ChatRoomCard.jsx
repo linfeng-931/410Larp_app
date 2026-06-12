@@ -146,8 +146,8 @@ export default function ChatRoomCard({ room, userProfile }) {
                         />
                     )}
                     <View style={{ justifyContent: "center", gap: 8 }}>
-                        <Text style={[styles.title, { maxWidth: 170 }]} numberOfLines={1}>{chatRoomName}</Text>
-                        <Text style={{ fontSize: 14, color: isLight ? '#00000079' : '#ffffff79' }} numberOfLines={1}>
+                        <Text style={[styles.title, { maxWidth: 140 }]} numberOfLines={1}>{chatRoomName}</Text>
+                        <Text style={{ fontSize: 14, maxWidth: 130, color: isLight ? '#00000079' : '#ffffff79' }} numberOfLines={1}>
                             {chatRoomMessage ? chatRoomMessage : ''}
                         </Text>
                     </View>

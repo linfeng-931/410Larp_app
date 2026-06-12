@@ -10,7 +10,7 @@ import {
     Image
 } from "react-native";
 import { useLocalSearchParams, Stack, useFocusEffect } from "expo-router";
-import { useRef, useState, useEffect, useCallback} from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../firebase";
 import LottieView from 'lottie-react-native';
@@ -102,6 +102,13 @@ export default function AnRoom() {
         }, [id, currentUser?.uid])
     );
 
+    const scrollToBottom = () => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollToEnd({ animated: true });
+        }
+    };
+
+
     if (loading) {
         return (
             <SafeAreaView style={[styles.safeArea, {
@@ -132,7 +139,7 @@ export default function AnRoom() {
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
             >
                 <View style={{ flex: 1, width: '100%' }}>
 
@@ -140,6 +147,8 @@ export default function AnRoom() {
                     <FlatList
                         ref={scrollRef}
                         data={messages}
+                        onContentSizeChange={scrollToBottom}
+                        onLayout={scrollToBottom}
                         keyExtractor={(item, index) => index.toString()}
                         contentContainerStyle={{ paddingBottom: 16, flexGrow: 1 }}
                         showsVerticalScrollIndicator={false}
@@ -256,6 +265,9 @@ export default function AnRoom() {
                         <TextInput
                             value={inputText}
                             onChangeText={setInputText}
+                            onFocus={() => {
+                                setTimeout(scrollToBottom, 200);
+                            }}
                             placeholder="請輸入訊息..."
                             placeholderTextColor={isLight ? '#999' : '#666'}
                             style={{
